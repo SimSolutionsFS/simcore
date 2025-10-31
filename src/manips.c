@@ -1,4 +1,4 @@
-#include "libswitch.h"
+#include "simcore/manips.h"
 
 #include <assert.h>
 #include <stdlib.h>
@@ -89,7 +89,7 @@ int sw_multi_r_cb(XPLMCommandRef inCommand, XPLMCommandPhase inPhase, void *inRe
 }
 
 // Refresh all animation datarefs
-void sw_ref() {
+void sw_ref(void) {
 	for (int i = 0; i < all_sw_size; i++) {
 		if (all_sw[i].act_gain != 0) {
 			all_sw[i].anim_pos += all_sw[i].act_gain;
@@ -144,7 +144,7 @@ double sw_multi_get_anim(void *inRefcon) {
 	return all_sw[(int)inRefcon].anim_pos;
 }
 
-switch_t sw_init() {
+switch_t sw_init(void) {
 	int idx;
 	if (all_sw == NULL) {
 		// Allocate initial memory if the array doesn't already exist
@@ -377,7 +377,7 @@ switch_t sw_multi_init(const char *dr_name, const char *dr_anim_name, const char
 	return idx;
 }
 
-void sw_destroy() {
+void sw_destroy(void) {
 	// Unregister all commands
 	for (int i = 0; i < all_sw_size; i++) {
 		switch (all_sw[i].type) {

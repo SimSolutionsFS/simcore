@@ -1,4 +1,8 @@
-# libswitch
-libswitch is a WIP WIP WIP library to handle the registration of cockpit switches in X-Plane, complete with animation datarefs.
+# SimCore
+SimCore is an internal solution with common functions across SimSolution's X-Plane projects.
 
-You probably don't want to use this.
+The project currently consists of the following:
+* [manips.h](src/simcore/manips.h), formerly the open-source **libswitch**, which handles callbacks for switch manipulators and animation datarefs.
+
+In the future, the project plans to include:
+* [persist.h](src/simcore/persist.h), a continuation of the persistence system first introduced in the DA40.

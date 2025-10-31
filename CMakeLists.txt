@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.21)
-project(libswitch C)
+project(simcore C)
 
 set(CMAKE_C_STANDARD 17)
 
@@ -19,15 +19,15 @@ add_definitions(
 )
 
 # Include source code
-add_library(libswitch
-	${CMAKE_CURRENT_SOURCE_DIR}/libswitch.c
-	${CMAKE_CURRENT_SOURCE_DIR}/libswitch.h
+add_library(simcore
+	${CMAKE_CURRENT_SOURCE_DIR}/src/manips.c
+	${CMAKE_CURRENT_SOURCE_DIR}/src/simcore/manips.h
 )
 
-# Include directories for both libswitch & its dependencies
-target_include_directories(libswitch
+# Include directories for both SimCore & its dependencies
+target_include_directories(simcore
 	PUBLIC
-	${CMAKE_CURRENT_SOURCE_DIR}
+	${CMAKE_CURRENT_SOURCE_DIR}/src
 
 	PRIVATE
 	${CMAKE_CURRENT_SOURCE_DIR}/deps/XPSDK/CHeaders/XPLM
@@ -43,13 +43,14 @@ if (WIN32)
 	)
 
 	# Libraries to link
-	target_link_libraries(libswitch
+	target_link_libraries(simcore
+		${LINK_LIBRARIES}
 		${CMAKE_CURRENT_SOURCE_DIR}/deps/XPSDK/Libraries/Win/XPLM_64.lib
 		${CMAKE_CURRENT_SOURCE_DIR}/deps/XPSDK/Libraries/Win/XPWidgets_64.lib
 	)
 
 	# Output Directory
-	set_target_properties(libswitch PROPERTIES
+	set_target_properties(simcore PROPERTIES
 		ARCHIVE_OUTPUT_DIRECTORY ./build/win
 	)
 elseif (APPLE)
@@ -57,13 +58,14 @@ elseif (APPLE)
 	add_definitions(-DAPL)
 
 	# Libraries to link
-	target_link_libraries(libswitch
+	target_link_libraries(simcore
+		${LINK_LIBRARIES}
 		${CMAKE_CURRENT_SOURCE_DIR}/deps/XPSDK/Libraries/Mac/XPLM.framework
 		${CMAKE_CURRENT_SOURCE_DIR}/deps/XPSDK/Libraries/Mac/XPWidgets.framework
 	)
 
 	# Output Directory
-	set_target_properties(libswitch PROPERTIES
+	set_target_properties(simcore PROPERTIES
 		ARCHIVE_OUTPUT_DIRECTORY ./build/mac
 	)
 else ()
@@ -71,7 +73,7 @@ else ()
 	add_definitions(-DLIN)
 
 	# Output Directory
-	set_target_properties(libswitch PROPERTIES
+	set_target_properties(simcore PROPERTIES
 		ARCHIVE_OUTPUT_DIRECTORY ./build/lin
 	)
 endif ()
