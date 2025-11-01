@@ -7,12 +7,15 @@
 
 #define SWITCH_GAIN 0.2
 
+typedef enum { SW_BASIC, SW_MULTI } sw_type_t;
+
 struct {
 	// Internal
 	sw_type_t type;
 
 	// Data for basic switches
 	int state;
+	int spring;
 	double act_gain;
 	double anim_pos;
 	XPLMDataRef dr_state;
@@ -34,31 +37,29 @@ int all_sw_size = 0;
 int sw_basic_cb(XPLMCommandRef inCommand, XPLMCommandPhase inPhase, void *inRefcon) {
 	int i = (int)inRefcon;
 
-	if (inPhase == 0) {
-		if (all_sw[i].state == 0) {
+	if (all_sw[i].spring == false) {
+		if (inPhase == 0) {
+			if (all_sw[i].state == 0) {
+				all_sw[i].act_gain = SWITCH_GAIN;
+			}
+			else {
+				all_sw[i].act_gain = -SWITCH_GAIN;
+			}
+
+			all_sw[i].state = !all_sw[i].state;
+		}
+	}
+	else {
+		if (inPhase == 0) {
 			all_sw[i].act_gain = SWITCH_GAIN;
+			all_sw[i].state = 1;
 		}
-		else {
+		else if (inPhase == 2) {
 			all_sw[i].act_gain = -SWITCH_GAIN;
+			all_sw[i].state = 0;
 		}
-
-		all_sw[i].state = !all_sw[i].state;
 	}
 
-	return xplm_CommandContinue;
-}
-
-int sw_spring_cb(XPLMCommandRef inCommand, XPLMCommandPhase inPhase, void *inRefcon) {
-	int i = (int)inRefcon;
-
-	if (inPhase == 0) {
-		all_sw[i].act_gain = SWITCH_GAIN;
-		all_sw[i].state = 1;
-	}
-	else if (inPhase == 2) {
-		all_sw[i].act_gain = -SWITCH_GAIN;
-		all_sw[i].state = 0;
-	}
 	return xplm_CommandContinue;
 }
 
@@ -108,43 +109,19 @@ void sw_ref(void) {
 }
 
 // Callbacks to update the state of the switch. Used by X-Plane and other stakeholders
-int sw_basic_get_state(void *inRefcon) {
+int sw_get_state(void *inRefcon) {
 	return all_sw[(int)inRefcon].state;
 }
 
-void sw_basic_write_state(void *inRefcon, int inValue) {
+void sw_write_state(void *inRefcon, int inValue) {
 	all_sw[(int)inRefcon].state = inValue;
 }
 
-double sw_basic_get_anim(void *inRefcon) {
+double sw_get_anim(void *inRefcon) {
 	return all_sw[(int)inRefcon].anim_pos;
 }
 
-int sw_spring_get_state(void *inRefcon) {
-	return all_sw[(int)inRefcon].state;
-}
-
-void sw_spring_write_state(void *inRefcon, int inValue) {
-	all_sw[(int)inRefcon].state = inValue;
-}
-
-double sw_spring_get_anim(void *inRefcon) {
-	return all_sw[(int)inRefcon].anim_pos;
-}
-
-int sw_multi_get_state(void *inRefcon) {
-	return all_sw[(int)inRefcon].state;
-}
-
-void sw_multi_write_state(void *inRefcon, int inValue) {
-	all_sw[(int)inRefcon].state = inValue;
-}
-
-double sw_multi_get_anim(void *inRefcon) {
-	return all_sw[(int)inRefcon].anim_pos;
-}
-
-switch_t sw_init(void) {
+switch_t sw_append(void) {
 	int idx;
 	if (all_sw == NULL) {
 		// Allocate initial memory if the array doesn't already exist
@@ -166,10 +143,11 @@ switch_t sw_init(void) {
 	return idx;
 }
 
-switch_t sw_basic_init(const char *dr_name, const char *dr_anim_name, const char *cmd_name, const char *cmd_desc) {
+switch_t sw_init(const char *dr_name, const char *dr_anim_name, const char *cmd_name, const char *cmd_desc, const int spring) {
 	// Initialize the switch
-	int idx = sw_init();
+	int idx = sw_append();
 	all_sw[idx].type = SW_BASIC;
+	all_sw[idx].spring = spring;
 
 	// Register commands
 	if (cmd_desc == NULL) {
@@ -190,8 +168,8 @@ switch_t sw_basic_init(const char *dr_name, const char *dr_anim_name, const char
 			dr_name,
 			xplmType_Int,
 			true,
-			sw_basic_get_state,
-			sw_basic_write_state,
+			sw_get_state,
+			sw_write_state,
 			NULL,
 			NULL,
 			NULL,
@@ -216,7 +194,7 @@ switch_t sw_basic_init(const char *dr_name, const char *dr_anim_name, const char
 			NULL,
 			NULL,
 			NULL,
-			sw_basic_get_anim,
+			sw_get_anim,
 			NULL,
 			NULL,
 			NULL,
@@ -232,78 +210,12 @@ switch_t sw_basic_init(const char *dr_name, const char *dr_anim_name, const char
 	return idx;
 }
 
-switch_t sw_spring_init(const char *dr_name, const char *dr_anim_name, const char *cmd_name, const char *cmd_desc) {
-	// Initialize the switch
-	int idx = sw_init();
-	all_sw[idx].type = SW_SPRING;
-
-	// Register commands
-	if (cmd_desc == NULL) {
-		cmd_desc = "";
-	}
-
-	if (XPLMFindCommand(cmd_name) == NULL) {
-		all_sw[idx].cmd_toggle = XPLMCreateCommand(cmd_name, cmd_desc);
-	}
-	else {
-		all_sw[idx].cmd_toggle = XPLMFindCommand(cmd_name);
-	}
-	XPLMRegisterCommandHandler(all_sw[idx].cmd_toggle, sw_spring_cb, true, (void *)idx);
-
-	// Register datarefs
-	if (dr_name != NULL) {
-		XPLMRegisterDataAccessor(
-			dr_name,
-			xplmType_Int,
-			true,
-			sw_spring_get_state,
-			sw_spring_write_state,
-			NULL,
-			NULL,
-			NULL,
-			NULL,
-			NULL,
-			NULL,
-			NULL,
-			NULL,
-			NULL,
-			NULL,
-			(void *)idx,
-			(void *)idx
-		);
-	}
-
-	if (dr_anim_name != NULL) {
-		XPLMRegisterDataAccessor(
-			dr_anim_name,
-			xplmType_Double,
-			false,
-			NULL,
-			NULL,
-			NULL,
-			NULL,
-			sw_spring_get_anim,
-			NULL,
-			NULL,
-			NULL,
-			NULL,
-			NULL,
-			NULL,
-			NULL,
-			(void *)idx,
-			NULL
-		);
-	}
-
-	return idx;
-}
-
-switch_t sw_multi_init(const char *dr_name, const char *dr_anim_name, const char *cmd_name_l, const char *cmd_desc_l,
+switch_t sw_init2(const char *dr_name, const char *dr_anim_name, const char *cmd_name_l, const char *cmd_desc_l,
 					   const char *cmd_name_r, const char *cmd_desc_r, const int min_range, const int max_range,
 					   const int default_value,
 					   const bool starter) {
 	// Initialize the switch
-	int idx = sw_init();
+	int idx = sw_append();
 	all_sw[idx].type = SW_MULTI;
 
 	all_sw[idx].state = default_value;
@@ -335,8 +247,8 @@ switch_t sw_multi_init(const char *dr_name, const char *dr_anim_name, const char
 			dr_name,
 			xplmType_Int,
 			true,
-			sw_multi_get_state,
-			sw_multi_write_state,
+			sw_get_state,
+			sw_write_state,
 			NULL,
 			NULL,
 			NULL,
@@ -361,7 +273,7 @@ switch_t sw_multi_init(const char *dr_name, const char *dr_anim_name, const char
 			NULL,
 			NULL,
 			NULL,
-			sw_multi_get_anim,
+			sw_get_anim,
 			NULL,
 			NULL,
 			NULL,
@@ -381,9 +293,6 @@ void sw_destroy(void) {
 	// Unregister all commands
 	for (int i = 0; i < all_sw_size; i++) {
 		switch (all_sw[i].type) {
-			case SW_SPRING:
-				XPLMUnregisterCommandHandler(all_sw[i].cmd_toggle, sw_spring_cb, 1, (void *)i);
-				break;
 			case SW_MULTI:
 				XPLMUnregisterCommandHandler(all_sw[i].cmd_toggle_l, sw_multi_l_cb, 1, (void *)i);
 				XPLMUnregisterCommandHandler(all_sw[i].cmd_toggle_r, sw_multi_r_cb, 1, (void *)i);
