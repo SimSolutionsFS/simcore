@@ -34,12 +34,13 @@ switch_t sw_init(const char *dr_name, const char *dr_anim_name, const char *cmd_
  * @param max_range Maximum value the switch can be.
  * @param default_value Default value of the switch.
  * @param starter If true, the last position will be spring-loaded.
+ * @param spring Does the switch return to 0 once released? Cannot be used with `starter`.
  *
  * @return An ID for the switch.
  */
 switch_t sw_init2(const char *dr_name, const char *dr_anim_name, const char *cmd_name_l, const char *cmd_desc_l,
-					   const char *cmd_name_r, const char *cmd_desc_r, const int min_range, const int max_range,
-					   const int default_value, const bool starter);
+				  const char *cmd_name_r, const char *cmd_desc_r, int min_range, int max_range, int default_value,
+				  int starter, int spring);
 
 /**
  * @brief Gets the state of a switch.
@@ -66,6 +67,6 @@ void sw_ref(void);
 /**
  * @brief Destroys all registered switches.
  */
-void sw_destroy();
+void sw_destroy(void);
 
 #endif //LIBSWITCH_H
