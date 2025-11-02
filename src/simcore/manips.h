@@ -60,6 +60,14 @@ int sw_get_state(void *inRefcon);
 void sw_write_state(void *inRefcon, int inValue);
 
 /**
+ * @brief Gets the animation state of a switch
+ *
+ * @param inRefcon Switch to modify
+ * @return Current position of the switches animation
+ */
+double sw_get_anim(void *inRefcon);
+
+/**
  * @brief Refreshes all registered switches.
  */
 void sw_ref(void);
