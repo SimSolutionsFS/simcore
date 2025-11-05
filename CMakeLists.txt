@@ -22,14 +22,18 @@ add_definitions(
 add_library(simcore
 	${CMAKE_CURRENT_SOURCE_DIR}/src/manips.c
 	${CMAKE_CURRENT_SOURCE_DIR}/src/simcore/manips.h
+	${CMAKE_CURRENT_SOURCE_DIR}/src/persist.c
+	${CMAKE_CURRENT_SOURCE_DIR}/src/simcore/persist.h
 )
 
 # Include directories for both SimCore & its dependencies
+find_package(Freetype REQUIRED)
+include_directories(${FREETYPE_INCLUDE_DIRS})
 target_include_directories(simcore
 	PUBLIC
 	${CMAKE_CURRENT_SOURCE_DIR}/src
-
-	PRIVATE
+	${CMAKE_CURRENT_SOURCE_DIR}/deps/libacfutils/src
+	${CMAKE_CURRENT_SOURCE_DIR}/deps/xpdraw/src
 	${CMAKE_CURRENT_SOURCE_DIR}/deps/XPSDK/CHeaders/XPLM
 	${CMAKE_CURRENT_SOURCE_DIR}/deps/XPSDK/CHeaders/Widgets
 )
