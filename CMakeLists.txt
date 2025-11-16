@@ -24,11 +24,19 @@ add_library(simcore
 	${CMAKE_CURRENT_SOURCE_DIR}/src/simcore/manips.h
 	${CMAKE_CURRENT_SOURCE_DIR}/src/persist.c
 	${CMAKE_CURRENT_SOURCE_DIR}/src/simcore/persist.h
+
+	${CMAKE_CURRENT_SOURCE_DIR}/src/xpdraw.c
+	${CMAKE_CURRENT_SOURCE_DIR}/src/xpdraw/xpdraw.h
+	${CMAKE_CURRENT_SOURCE_DIR}/src/windows.c
+	${CMAKE_CURRENT_SOURCE_DIR}/src/xpdraw/windows.h
+	${CMAKE_CURRENT_SOURCE_DIR}/src/tools.c
+	${CMAKE_CURRENT_SOURCE_DIR}/src/xpdraw/tools.h
+	${CMAKE_CURRENT_SOURCE_DIR}/src/fonts.c
+	${CMAKE_CURRENT_SOURCE_DIR}/src/xpdraw/fonts.h
 )
 
 # Include directories for both SimCore & its dependencies
 find_package(Freetype REQUIRED)
-include_directories(${FREETYPE_INCLUDE_DIRS})
 target_include_directories(simcore
 	PUBLIC
 	${CMAKE_CURRENT_SOURCE_DIR}/src
@@ -37,6 +45,9 @@ target_include_directories(simcore
 	${CMAKE_CURRENT_SOURCE_DIR}/deps/XPSDK/CHeaders/XPLM
 	${CMAKE_CURRENT_SOURCE_DIR}/deps/XPSDK/CHeaders/Widgets
 	${CMAKE_CURRENT_SOURCE_DIR}/deps/libacfutils-redist/include
+
+	PRIVATE
+	${CMAKE_CURRENT_SOURCE_DIR}/deps/stb
 )
 
 if (WIN32)
@@ -80,7 +91,10 @@ endif ()
 
 # OS-specific options
 if (WIN32)
-	include_directories("deps/libacfutils-redist/mingw64/include")
+	include_directories(
+		${FREETYPE_INCLUDE_DIRS}
+		"deps/libacfutils-redist/mingw64/include"
+	)
 
 	# Compiler Definitions
 	add_definitions(
@@ -105,7 +119,10 @@ if (WIN32)
 		ARCHIVE_OUTPUT_DIRECTORY ./build/win
 	)
 elseif (APPLE)
-	include_directories("deps/libacfutils-redist/mac64/include")
+	include_directories(
+		${FREETYPE_INCLUDE_DIRS}
+		"deps/libacfutils-redist/mac64/include"
+	)
 
 	# Compiler Definitions
 	add_definitions(-DAPL)
@@ -124,7 +141,10 @@ elseif (APPLE)
 		ARCHIVE_OUTPUT_DIRECTORY ./build/mac
 	)
 else ()
-	include_directories("deps/libacfutils-redist/lin64/include")
+	include_directories(
+		${FREETYPE_INCLUDE_DIRS}
+		"deps/libacfutils-redist/lin64/include"
+	)
 
 	# Compiler Definitions
 	add_definitions(-DLIN)
