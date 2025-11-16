@@ -1,9 +1,9 @@
 [submodule "deps/XPSDK"]
 	path = deps/XPSDK
 	url = https://github.com/slimit75/XPSDK
-[submodule "deps/libacfutils"]
-	path = deps/libacfutils
-	url = https://codeberg.org/skiselkov/libacfutils
 [submodule "deps/xpdraw"]
 	path = deps/xpdraw
 	url = https://github.com/slimit75/xpdraw
+[submodule "deps/libacfutils-redist"]
+	path = deps/libacfutils-redist
+	url = https://github.com/SimSolutionsFS/libacfutils-redist
