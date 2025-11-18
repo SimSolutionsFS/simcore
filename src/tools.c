@@ -47,12 +47,3 @@ int xpd_tools_xp_ver() {
 	}
 	return xp_ver;
 }
-
-void xpd_assert(int exp, char *msg) {
-	if (!exp) {
-		char str[256];
-		sprintf(str, "xpdraw: %s \n", msg);
-		XPLMDebugString(str);
-		assert(exp);
-	}
-}

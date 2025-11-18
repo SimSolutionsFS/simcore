@@ -51,14 +51,6 @@ char *xpd_tools_xp_fp();
  */
 int xpd_tools_xp_ver();
 
-/**
- * @brief Checks to see if `exp` is true, if not then throws an error and quits
- *
- * @param exp Expression to check
- * @param msg Error message to print
- */
-void xpd_assert(int exp, char *msg);
-
 #ifdef __cplusplus
 }
 #endif
