@@ -2,8 +2,7 @@
 
 #define STB_IMAGE_IMPLEMENTATION
 #include <stb_image.h>
-
-#include "xpdraw/tools.h"
+#include <acfutils/assert.h>
 
 int anchor_x = 0;
 int anchor_y = 0;
@@ -173,7 +172,7 @@ void xpd_load_texture(xpd_texture_t *texture, const char *filename) {
 	unsigned char *texDat = stbi_load(filename, &width, &height, &nrChannels, 4);
 
 	// Load the buffer into a xpd texture
-	xpd_assert(texDat != NULL, "ERROR: Could not load texture!");
+	ASSERT_MSG(texDat != NULL, "Could not load texture at %s!", filename);
 
 	xpd_load_buffer(texture, texDat, width, height, GL_RGBA);
 	stbi_image_free(texDat);
