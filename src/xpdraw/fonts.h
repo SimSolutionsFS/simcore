@@ -55,6 +55,12 @@ typedef struct {
  */
 void xpd_font_load(xpd_font_face_t *font, const char *path, const int size);
 
+inline void xpd_font_load2(xpd_font_face_t *font, const char *root, const char *filename, const int size) {
+	char *fnt_pth_tmp = xpd_tools_constr(root, filename);
+	xpd_font_load(font, fnt_pth_tmp, size);
+	free(fnt_pth_tmp);
+}
+
 /**
  * @brief Returns the length of a string.
  *

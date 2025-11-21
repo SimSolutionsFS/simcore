@@ -16,6 +16,9 @@
 */
 #ifndef XPDRAW_H
 #define XPDRAW_H
+#include <stdlib.h>
+
+#include "tools.h"
 
 #if LIN
 #include <GL/gl.h>
@@ -88,6 +91,8 @@ void xpd_set_anchor(int newAnchor_x, int newAnchor_y);
  * @param color Color of the triangle
  */
 void xpd_draw_triangle(int x, int y, int width, int height, xpd_color_t color);
+
+void xpd_draw_circle(int left, int bottom, int r, xpd_color_t color);
 
 /**
  * @brief Draw a rectangle with the specified parameters
@@ -191,6 +196,12 @@ void xpd_draw_rotated_texture(xpd_texture_t *texture, double angle, int left, in
  * @param filename File path to load
  */
 void xpd_load_texture(xpd_texture_t *texture, const char *filename);
+
+inline void xpd_load_texture2(xpd_texture_t *texture, const char *root, const char *filename) {
+	char *txt_pth_tmp = xpd_tools_constr(root, filename);
+	xpd_load_texture(texture, txt_pth_tmp);
+	free(txt_pth_tmp);
+}
 
 #ifdef __cplusplus
 }

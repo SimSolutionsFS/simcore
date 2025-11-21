@@ -46,6 +46,12 @@ void xpd_draw_triangle(int x, int y, int width, int height, xpd_color_t color) {
 	}
 }
 
+void xpd_draw_circle(int left, int bottom, int r, xpd_color_t color) {
+	glColor4f(color.red, color.green, color.blue, color.alpha);
+
+	// TODO: Implement this.
+}
+
 void xpd_draw_rect(int left, int bottom, int width, int height, xpd_color_t color) {
 	glColor4f(color.red, color.green, color.blue, color.alpha);
 
