@@ -37,7 +37,7 @@ int all_sw_size = 0;
 int sw_basic_cb(XPLMCommandRef inCommand, XPLMCommandPhase inPhase, void *inRefcon) {
 	int i = (int)inRefcon;
 
-	if (inPhase == 0) {
+	if (inPhase == xplm_CommandBegin) {
 		if (all_sw[i].state == 0) {
 			all_sw[i].act_gain = SWITCH_GAIN;
 		}
@@ -47,7 +47,7 @@ int sw_basic_cb(XPLMCommandRef inCommand, XPLMCommandPhase inPhase, void *inRefc
 
 		all_sw[i].state = !all_sw[i].state;
 	}
-	else if ((all_sw[i].spring) && (inPhase == 2)) {
+	else if ((all_sw[i].spring) && (inPhase == xplm_CommandEnd)) {
 		all_sw[i].act_gain = -SWITCH_GAIN;
 		all_sw[i].state = 0;
 	}
@@ -58,11 +58,11 @@ int sw_basic_cb(XPLMCommandRef inCommand, XPLMCommandPhase inPhase, void *inRefc
 int sw_cb_l(XPLMCommandRef inCommand, XPLMCommandPhase inPhase, void *inRefcon) {
 	int i = (int)inRefcon;
 
-	if ((inPhase == 0) && (all_sw[i].state > all_sw[i].min)) {
+	if ((inPhase == xplm_CommandBegin) && (all_sw[i].state > all_sw[i].min)) {
 		all_sw[i].act_gain = -SWITCH_GAIN;
 		all_sw[i].state -= 1;
 	}
-	else if ((inPhase == 2) && (all_sw[i].spring)) {
+	else if ((inPhase == xplm_CommandEnd) && (all_sw[i].spring)) {
 		all_sw[i].act_gain = SWITCH_GAIN;
 		all_sw[i].state = 0;
 	}
@@ -73,11 +73,11 @@ int sw_cb_l(XPLMCommandRef inCommand, XPLMCommandPhase inPhase, void *inRefcon) 
 int sw_cb_r(XPLMCommandRef inCommand, XPLMCommandPhase inPhase, void *inRefcon) {
 	int i = (int)inRefcon;
 
-	if ((inPhase == 0) && (all_sw[i].state < all_sw[i].max)) {
+	if ((inPhase == xplm_CommandBegin) && (all_sw[i].state < all_sw[i].max)) {
 		all_sw[i].act_gain = SWITCH_GAIN;
 		all_sw[i].state += 1;
 	}
-	else if ((inPhase == 2) && ((all_sw[i].starter) || (all_sw[i].spring)) && (all_sw[i].state == all_sw[i].max)) {
+	else if ((inPhase == xplm_CommandEnd) && ((all_sw[i].starter) || (all_sw[i].spring)) && (all_sw[i].state == all_sw[i].max)) {
 		all_sw[i].act_gain = -SWITCH_GAIN;
 		all_sw[i].state -= 1;
 	}
