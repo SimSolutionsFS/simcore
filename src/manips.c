@@ -4,8 +4,11 @@
 #include <stdlib.h>
 #include <XPLMDataAccess.h>
 #include <XPLMUtilities.h>
+#include <acfutils/cmd.h>
+#include <acfutils/dr.h>
 
-#define SWITCH_GAIN 0.2
+#define SWITCH_GAIN 0.2f
+
 
 typedef enum { SW_BASIC, SW_MULTI } sw_type_t;
 
@@ -16,16 +19,17 @@ struct {
 	// Data for basic switches
 	int state;
 	int spring;
-	double act_gain;
-	double anim_pos;
-	XPLMDataRef dr_state;
-	XPLMDataRef dr_anim;
+	float act_gain;
+	float anim_pos;
+	dr_t dr_state;
+	int dr_state_exists;
+	dr_t dr_anim;
 	XPLMCommandRef cmd_toggle;
 
 	// Data for multi-position switches
 	int min;
 	int max;
-	bool starter;
+	int starter;
 	XPLMCommandRef cmd_toggle_l;
 	XPLMCommandRef cmd_toggle_r;
 } typedef sw_t;
@@ -52,6 +56,10 @@ int sw_basic_cb(XPLMCommandRef inCommand, XPLMCommandPhase inPhase, void *inRefc
 		all_sw[i].state = 0;
 	}
 
+	if (all_sw[i].dr_state_exists) {
+		dr_seti(&all_sw[i].dr_state, all_sw[i].state);
+	}
+
 	return xplm_CommandContinue;
 }
 
@@ -67,6 +75,10 @@ int sw_cb_l(XPLMCommandRef inCommand, XPLMCommandPhase inPhase, void *inRefcon) 
 		all_sw[i].state = 0;
 	}
 
+	if (all_sw[i].dr_state_exists) {
+		dr_seti(&all_sw[i].dr_state, all_sw[i].state);
+	}
+
 	return xplm_CommandContinue;
 }
 
@@ -80,6 +92,10 @@ int sw_cb_r(XPLMCommandRef inCommand, XPLMCommandPhase inPhase, void *inRefcon) 
 	else if ((inPhase == xplm_CommandEnd) && ((all_sw[i].starter) || (all_sw[i].spring)) && (all_sw[i].state == all_sw[i].max)) {
 		all_sw[i].act_gain = -SWITCH_GAIN;
 		all_sw[i].state -= 1;
+	}
+
+	if (all_sw[i].dr_state_exists) {
+		dr_seti(&all_sw[i].dr_state, all_sw[i].state);
 	}
 
 	return xplm_CommandContinue;
@@ -113,7 +129,7 @@ void sw_write_state(void *inRefcon, int inValue) {
 	all_sw[(int)inRefcon].state = inValue;
 }
 
-double sw_get_anim(void *inRefcon) {
+float sw_get_anim(void *inRefcon) {
 	return all_sw[(int)inRefcon].anim_pos;
 }
 
@@ -129,12 +145,14 @@ switch_t sw_append(void) {
 		// Expand the array to support our new switch
 		all_sw_size++;
 		all_sw = realloc(all_sw, sizeof(sw_t) * all_sw_size);
+		assert(all_sw);
 		idx = all_sw_size - 1;
 	}
 
 	all_sw[idx].state = 0;
 	all_sw[idx].anim_pos = 0;
 	all_sw[idx].act_gain = 0;
+	all_sw[idx].dr_state_exists = 0;
 
 	return idx;
 }
@@ -150,47 +168,33 @@ switch_t sw_init(const char *dr_name, const char *dr_anim_name, const char *cmd_
 		cmd_desc = "";
 	}
 
-	if (XPLMFindCommand(cmd_name) == NULL) {
+	all_sw[idx].cmd_toggle = XPLMFindCommand(cmd_name);
+	if (all_sw[idx].cmd_toggle == NULL) {
 		all_sw[idx].cmd_toggle = XPLMCreateCommand(cmd_name, cmd_desc);
 	}
-	else {
-		all_sw[idx].cmd_toggle = XPLMFindCommand(cmd_name);
-	}
-	XPLMRegisterCommandHandler(all_sw[idx].cmd_toggle, sw_basic_cb, 1, (void *)idx);
+	XPLMRegisterCommandHandler(all_sw[idx].cmd_toggle, sw_basic_cb, 0, (void *)idx);
 
 	// Register datarefs
 	if (dr_name != NULL) {
-		XPLMRegisterDataAccessor(
-			dr_name,
-			xplmType_Int,
-			true,
-			sw_get_state,
-			sw_write_state,
-			NULL,
-			NULL,
-			NULL,
-			NULL,
-			NULL,
-			NULL,
-			NULL,
-			NULL,
-			NULL,
-			NULL,
-			(void *)idx,
-			(void *)idx
-		);
+		unsigned int result = dr_find(&all_sw[idx].dr_state, "%s", dr_name);
+		if (result == 0) {
+			dr_create_i(&all_sw[idx].dr_state, &all_sw[idx].state, 1, "%s", dr_name);
+		}
+		else {
+			all_sw[idx].dr_state_exists = 1;
+		}
 	}
 
 	if (dr_anim_name != NULL) {
 		XPLMRegisterDataAccessor(
 			dr_anim_name,
-			xplmType_Double,
-			false,
-			NULL,
-			NULL,
+			xplmType_Float,
+			0,
 			NULL,
 			NULL,
 			sw_get_anim,
+			NULL,
+			NULL,
 			NULL,
 			NULL,
 			NULL,
@@ -222,54 +226,43 @@ switch_t sw_init2(const char *dr_name, const char *dr_anim_name, const char *cmd
 	all_sw[idx].max = max_range;
 	all_sw[idx].starter = starter;
 
+	if (cmd_desc_l == NULL) {
+		cmd_desc_l = "";
+	}
+
+	if (cmd_desc_r == NULL) {
+		cmd_desc_r = "";
+	}
+
 	// Register commands
-	if (XPLMFindCommand(cmd_name_l) == NULL) {
+	all_sw[idx].cmd_toggle_l = XPLMFindCommand(cmd_name_l);
+	if (all_sw[idx].cmd_toggle_l == NULL) {
 		all_sw[idx].cmd_toggle_l = XPLMCreateCommand(cmd_name_l, cmd_desc_l);
 	}
-	else {
-		all_sw[idx].cmd_toggle_l = XPLMFindCommand(cmd_name_l);
-	}
+	XPLMRegisterCommandHandler(all_sw[idx].cmd_toggle_l, sw_cb_l, 0, (void *)idx);
 
-	if (XPLMFindCommand(cmd_name_r) == NULL) {
+	all_sw[idx].cmd_toggle_r = XPLMFindCommand(cmd_name_r);
+	if (all_sw[idx].cmd_toggle_r == NULL) {
 		all_sw[idx].cmd_toggle_r = XPLMCreateCommand(cmd_name_r, cmd_desc_r);
 	}
-	else {
-		all_sw[idx].cmd_toggle_r = XPLMFindCommand(cmd_name_r);
-	}
-
-	XPLMRegisterCommandHandler(all_sw[idx].cmd_toggle_l, sw_cb_l, true, (void *)idx);
-	XPLMRegisterCommandHandler(all_sw[idx].cmd_toggle_r, sw_cb_r, true, (void *)idx);
+	XPLMRegisterCommandHandler(all_sw[idx].cmd_toggle_r, sw_cb_r, 0, (void *)idx);
 
 	// Register datarefs
 	if (dr_name != NULL) {
-		XPLMRegisterDataAccessor(
-			dr_name,
-			xplmType_Int,
-			true,
-			sw_get_state,
-			sw_write_state,
-			NULL,
-			NULL,
-			NULL,
-			NULL,
-			NULL,
-			NULL,
-			NULL,
-			NULL,
-			NULL,
-			NULL,
-			(void *)idx,
-			(void *)idx
-		);
+		unsigned int result = dr_find(&all_sw[idx].dr_state, "%s", dr_name);
+		if (result == 0) {
+			dr_create_i(&all_sw[idx].dr_state, &all_sw[idx].state, 1, "%s", dr_name);
+		}
+		else {
+			all_sw[idx].dr_state_exists = 1;
+		}
 	}
 
 	if (dr_anim_name != NULL) {
 		XPLMRegisterDataAccessor(
 			dr_anim_name,
-			xplmType_Double,
-			false,
-			NULL,
-			NULL,
+			xplmType_Float,
+			0,
 			NULL,
 			NULL,
 			sw_get_anim,
@@ -280,7 +273,9 @@ switch_t sw_init2(const char *dr_name, const char *dr_anim_name, const char *cmd
 			NULL,
 			NULL,
 			NULL,
-			(void *)idx,
+			NULL,
+			NULL,
+			(void*)idx,
 			NULL
 		);
 	}
@@ -293,11 +288,11 @@ void sw_destroy(void) {
 	for (int i = 0; i < all_sw_size; i++) {
 		switch (all_sw[i].type) {
 			case SW_MULTI:
-				XPLMUnregisterCommandHandler(all_sw[i].cmd_toggle_l, sw_cb_l, 1, (void *)i);
-				XPLMUnregisterCommandHandler(all_sw[i].cmd_toggle_r, sw_cb_r, 1, (void *)i);
+				XPLMUnregisterCommandHandler(all_sw[i].cmd_toggle_l, sw_cb_l, 0, (void *)i);
+				XPLMUnregisterCommandHandler(all_sw[i].cmd_toggle_r, sw_cb_r, 0, (void *)i);
 				break;
 			default:
-				XPLMUnregisterCommandHandler(all_sw[i].cmd_toggle, sw_basic_cb, 1, (void *)i);
+				XPLMUnregisterCommandHandler(all_sw[i].cmd_toggle, sw_basic_cb, 0, (void *)i);
 		}
 	}
 

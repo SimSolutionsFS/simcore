@@ -1,8 +1,6 @@
 #ifndef LIBSWITCH_H
 #define LIBSWITCH_H
 
-#include <stdbool.h>
-
 /**
  * @brief Switch 'type'. Not a pointer, but rather an index of all loaded switches.
  */
@@ -65,7 +63,7 @@ void sw_write_state(void *inRefcon, int inValue);
  * @param inRefcon Switch to modify
  * @return Current position of the switches animation
  */
-double sw_get_anim(void *inRefcon);
+float sw_get_anim(void *inRefcon);
 
 /**
  * @brief Refreshes all registered switches.
