@@ -1,10 +1,40 @@
 #ifndef LIBSWITCH_H
 #define LIBSWITCH_H
 
+#include <XPLMUtilities.h>
+#include <acfutils/dr.h>
+
+typedef enum { SW_BASIC, SW_MULTI } sw_type_t;
+
+struct {
+	// Internal
+	sw_type_t type;
+
+	// Data for basic switches
+	int state;
+	int spring;
+	float act_gain;
+	float anim_pos;
+	dr_t dr_state;
+	int dr_state_exists;
+	dr_t dr_anim;
+	XPLMCommandRef cmd_toggle;
+
+	// Data for multi-position switches
+	int min;
+	int max;
+	int starter;
+	XPLMCommandRef cmd_toggle_l;
+	XPLMCommandRef cmd_toggle_r;
+} typedef sw_t;
+
 /**
- * @brief Switch 'type'. Not a pointer, but rather an index of all loaded switches.
+ * @brief Exported switch type.
+ *
+ * Previously, this was an int that represented an index in an array.
+ * Currently, this represents a pointer to that array entry.
  */
-typedef int switch_t;
+typedef sw_t* switch_t;
 
 /**
  * @brief Initialize a basic, 2 position (on/off) switch
@@ -40,30 +70,20 @@ switch_t sw_init2(const char *dr_name, const char *dr_anim_name, const char *cmd
 				  const char *cmd_name_r, const char *cmd_desc_r, int min_range, int max_range, int default_value,
 				  int starter, int spring);
 
-/**
- * @brief Gets the state of a switch.
- *
- * @param inRefcon Switch to fetch
- * @return Current position of the switch (1 is usually on and 2 is usually off)
- */
-int sw_get_state(void *inRefcon);
+#if __STDC_VERSION__ == 202311L
+[[deprecated]]
+#endif
+int sw_get_state(switch_t inRefcon);
 
-/**
- * @brief Writes the state of a switch.
- *
- * @param inRefcon Switch to modify
- * @param inValue New value
- * @return New position of the switch (1 is usually on and 2 is usually off)
- */
-void sw_write_state(void *inRefcon, int inValue);
+#if __STDC_VERSION__ == 202311L
+[[deprecated]]
+#endif
+void sw_write_state(switch_t inRefcon, int inValue);
 
-/**
- * @brief Gets the animation state of a switch
- *
- * @param inRefcon Switch to modify
- * @return Current position of the switches animation
- */
-float sw_get_anim(void *inRefcon);
+#if __STDC_VERSION__ == 202311L
+[[deprecated]]
+#endif
+float sw_get_anim(switch_t inRefcon);
 
 /**
  * @brief Refreshes all registered switches.

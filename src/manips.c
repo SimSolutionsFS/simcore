@@ -9,93 +9,74 @@
 
 #define SWITCH_GAIN 0.2f
 
-
-typedef enum { SW_BASIC, SW_MULTI } sw_type_t;
-
-struct {
-	// Internal
-	sw_type_t type;
-
-	// Data for basic switches
-	int state;
-	int spring;
-	float act_gain;
-	float anim_pos;
-	dr_t dr_state;
-	int dr_state_exists;
-	dr_t dr_anim;
-	XPLMCommandRef cmd_toggle;
-
-	// Data for multi-position switches
-	int min;
-	int max;
-	int starter;
-	XPLMCommandRef cmd_toggle_l;
-	XPLMCommandRef cmd_toggle_r;
-} typedef sw_t;
-
 sw_t *all_sw;
 int all_sw_size = 0;
 
 // Switch Callbacks
 int sw_basic_cb(XPLMCommandRef inCommand, XPLMCommandPhase inPhase, void *inRefcon) {
-	int i = (int)inRefcon;
+	UNUSED(inCommand);
+
+	sw_t *i = inRefcon;
 
 	if (inPhase == xplm_CommandBegin) {
-		if (all_sw[i].state == 0) {
-			all_sw[i].act_gain = SWITCH_GAIN;
+		if (i->state == 0) {
+			i->act_gain = SWITCH_GAIN;
 		}
 		else {
-			all_sw[i].act_gain = -SWITCH_GAIN;
+			i->act_gain = -SWITCH_GAIN;
 		}
 
-		all_sw[i].state = !all_sw[i].state;
+		i->state = !i->state;
 	}
-	else if ((all_sw[i].spring) && (inPhase == xplm_CommandEnd)) {
-		all_sw[i].act_gain = -SWITCH_GAIN;
-		all_sw[i].state = 0;
+	else if ((i->spring) && (inPhase == xplm_CommandEnd)) {
+		i->act_gain = -SWITCH_GAIN;
+		i->state = 0;
 	}
 
-	if (all_sw[i].dr_state_exists) {
-		dr_seti(&all_sw[i].dr_state, all_sw[i].state);
+	if (i->dr_state_exists) {
+		dr_seti(&i->dr_state, i->state);
 	}
 
 	return xplm_CommandContinue;
 }
 
 int sw_cb_l(XPLMCommandRef inCommand, XPLMCommandPhase inPhase, void *inRefcon) {
-	int i = (int)inRefcon;
+	UNUSED(inCommand);
 
-	if ((inPhase == xplm_CommandBegin) && (all_sw[i].state > all_sw[i].min)) {
-		all_sw[i].act_gain = -SWITCH_GAIN;
-		all_sw[i].state -= 1;
+	sw_t *i = inRefcon;
+
+	if ((inPhase == xplm_CommandBegin) && (i->state > i->min)) {
+		i->act_gain = -SWITCH_GAIN;
+		i->state -= 1;
 	}
-	else if ((inPhase == xplm_CommandEnd) && (all_sw[i].spring)) {
-		all_sw[i].act_gain = SWITCH_GAIN;
-		all_sw[i].state = 0;
+	else if ((inPhase == xplm_CommandEnd) && (i->spring)) {
+		i->act_gain = SWITCH_GAIN;
+		i->state = 0;
 	}
 
-	if (all_sw[i].dr_state_exists) {
-		dr_seti(&all_sw[i].dr_state, all_sw[i].state);
+	if (i->dr_state_exists) {
+		dr_seti(&i->dr_state, i->state);
 	}
 
 	return xplm_CommandContinue;
 }
 
 int sw_cb_r(XPLMCommandRef inCommand, XPLMCommandPhase inPhase, void *inRefcon) {
-	int i = (int)inRefcon;
+	UNUSED(inCommand);
 
-	if ((inPhase == xplm_CommandBegin) && (all_sw[i].state < all_sw[i].max)) {
-		all_sw[i].act_gain = SWITCH_GAIN;
-		all_sw[i].state += 1;
+	sw_t *i = inRefcon;
+
+	if ((inPhase == xplm_CommandBegin) && (i->state < i->max)) {
+		i->act_gain = SWITCH_GAIN;
+		i->state += 1;
 	}
-	else if ((inPhase == xplm_CommandEnd) && ((all_sw[i].starter) || (all_sw[i].spring)) && (all_sw[i].state == all_sw[i].max)) {
-		all_sw[i].act_gain = -SWITCH_GAIN;
-		all_sw[i].state -= 1;
+	else if ((inPhase == xplm_CommandEnd) && ((i->starter) || (i->spring)) && (i->state == i->max)) {
+		i->act_gain = -SWITCH_GAIN;
+		i->state -= 1;
 	}
 
-	if (all_sw[i].dr_state_exists) {
-		dr_seti(&all_sw[i].dr_state, all_sw[i].state);
+	if (i->dr_state_exists) {
+		dr_seti(&i->dr_state, i->state);
 	}
 
 	return xplm_CommandContinue;
@@ -121,16 +102,16 @@ void sw_ref(void) {
 }
 
 // Callbacks to update the state of the switch. Used by X-Plane and other stakeholders
-int sw_get_state(void *inRefcon) {
-	return all_sw[(int)inRefcon].state;
+int sw_get_state(switch_t inRefcon) {
+	return inRefcon->state;
 }
 
-void sw_write_state(void *inRefcon, int inValue) {
-	all_sw[(int)inRefcon].state = inValue;
+void sw_write_state(switch_t inRefcon, int inValue) {
+	inRefcon->state = inValue;
 }
 
-float sw_get_anim(void *inRefcon) {
-	return all_sw[(int)inRefcon].anim_pos;
+float sw_get_anim(switch_t inRefcon) {
+	return inRefcon->anim_pos;
 }
 
 switch_t sw_append(void) {
@@ -154,57 +135,39 @@ switch_t sw_append(void) {
 	all_sw[idx].act_gain = 0;
 	all_sw[idx].dr_state_exists = 0;
 
-	return idx;
+	return &all_sw[idx];
 }
 
 switch_t sw_init(const char *dr_name, const char *dr_anim_name, const char *cmd_name, const char *cmd_desc, const int spring) {
 	// Initialize the switch
-	int idx = sw_append();
-	all_sw[idx].type = SW_BASIC;
-	all_sw[idx].spring = spring;
+	sw_t *idx = sw_append();
+	idx->type = SW_BASIC;
+	idx->spring = spring;
 
 	// Register commands
 	if (cmd_desc == NULL) {
 		cmd_desc = "";
 	}
 
-	all_sw[idx].cmd_toggle = XPLMFindCommand(cmd_name);
-	if (all_sw[idx].cmd_toggle == NULL) {
-		all_sw[idx].cmd_toggle = XPLMCreateCommand(cmd_name, cmd_desc);
+	idx->cmd_toggle = XPLMFindCommand(cmd_name);
+	if (idx->cmd_toggle == NULL) {
+		idx->cmd_toggle = XPLMCreateCommand(cmd_name, cmd_desc);
 	}
-	XPLMRegisterCommandHandler(all_sw[idx].cmd_toggle, sw_basic_cb, 0, (void *)idx);
+	XPLMRegisterCommandHandler(idx->cmd_toggle, sw_basic_cb, 0, (void *)idx);
 
 	// Register datarefs
 	if (dr_name != NULL) {
-		unsigned int result = dr_find(&all_sw[idx].dr_state, "%s", dr_name);
+		unsigned int result = dr_find(&idx->dr_state, "%s", dr_name);
 		if (result == 0) {
-			dr_create_i(&all_sw[idx].dr_state, &all_sw[idx].state, 1, "%s", dr_name);
+			dr_create_i(&idx->dr_state, &idx->state, 1, "%s", dr_name);
 		}
 		else {
-			all_sw[idx].dr_state_exists = 1;
+			idx->dr_state_exists = 1;
 		}
 	}
 
 	if (dr_anim_name != NULL) {
-		XPLMRegisterDataAccessor(
-			dr_anim_name,
-			xplmType_Float,
-			0,
-			NULL,
-			NULL,
-			sw_get_anim,
-			NULL,
-			NULL,
-			NULL,
-			NULL,
-			NULL,
-			NULL,
-			NULL,
-			NULL,
-			NULL,
-			(void *)idx,
-			NULL
-		);
+		dr_create_f(&idx->dr_anim, &idx->anim_pos, 0, "%s", dr_anim_name);
 	}
 
 	return idx;
@@ -215,16 +178,16 @@ switch_t sw_init2(const char *dr_name, const char *dr_anim_name, const char *cmd
 					   const int default_value,
 					   const int starter, const int spring) {
 	// Initialize the switch
-	int idx = sw_append();
-	all_sw[idx].type = SW_MULTI;
-	all_sw[idx].spring = spring;
+	sw_t *idx = sw_append();
+	idx->type = SW_MULTI;
+	idx->spring = spring;
 
 	assert(!(spring && starter));
 
-	all_sw[idx].state = default_value;
-	all_sw[idx].min = min_range;
-	all_sw[idx].max = max_range;
-	all_sw[idx].starter = starter;
+	idx->state = default_value;
+	idx->min = min_range;
+	idx->max = max_range;
+	idx->starter = starter;
 
 	if (cmd_desc_l == NULL) {
 		cmd_desc_l = "";
@@ -235,49 +198,31 @@ switch_t sw_init2(const char *dr_name, const char *dr_anim_name, const char *cmd
 	}
 
 	// Register commands
-	all_sw[idx].cmd_toggle_l = XPLMFindCommand(cmd_name_l);
-	if (all_sw[idx].cmd_toggle_l == NULL) {
-		all_sw[idx].cmd_toggle_l = XPLMCreateCommand(cmd_name_l, cmd_desc_l);
+	idx->cmd_toggle_l = XPLMFindCommand(cmd_name_l);
+	if (idx->cmd_toggle_l == NULL) {
+		idx->cmd_toggle_l = XPLMCreateCommand(cmd_name_l, cmd_desc_l);
 	}
-	XPLMRegisterCommandHandler(all_sw[idx].cmd_toggle_l, sw_cb_l, 0, (void *)idx);
+	XPLMRegisterCommandHandler(idx->cmd_toggle_l, sw_cb_l, 0, (void *)idx);
 
-	all_sw[idx].cmd_toggle_r = XPLMFindCommand(cmd_name_r);
-	if (all_sw[idx].cmd_toggle_r == NULL) {
-		all_sw[idx].cmd_toggle_r = XPLMCreateCommand(cmd_name_r, cmd_desc_r);
+	idx->cmd_toggle_r = XPLMFindCommand(cmd_name_r);
+	if (idx->cmd_toggle_r == NULL) {
+		idx->cmd_toggle_r = XPLMCreateCommand(cmd_name_r, cmd_desc_r);
 	}
-	XPLMRegisterCommandHandler(all_sw[idx].cmd_toggle_r, sw_cb_r, 0, (void *)idx);
+	XPLMRegisterCommandHandler(idx->cmd_toggle_r, sw_cb_r, 0, (void *)idx);
 
 	// Register datarefs
 	if (dr_name != NULL) {
-		unsigned int result = dr_find(&all_sw[idx].dr_state, "%s", dr_name);
+		unsigned int result = dr_find(&idx->dr_state, "%s", dr_name);
 		if (result == 0) {
-			dr_create_i(&all_sw[idx].dr_state, &all_sw[idx].state, 1, "%s", dr_name);
+			dr_create_i(&idx->dr_state, &idx->state, 1, "%s", dr_name);
 		}
 		else {
-			all_sw[idx].dr_state_exists = 1;
+			idx->dr_state_exists = 1;
 		}
 	}
 
 	if (dr_anim_name != NULL) {
-		XPLMRegisterDataAccessor(
-			dr_anim_name,
-			xplmType_Float,
-			0,
-			NULL,
-			NULL,
-			sw_get_anim,
-			NULL,
-			NULL,
-			NULL,
-			NULL,
-			NULL,
-			NULL,
-			NULL,
-			NULL,
-			NULL,
-			(void*)idx,
-			NULL
-		);
+		dr_create_f(&idx->dr_anim, &idx->anim_pos, 0, "%s", dr_anim_name);
 	}
 
 	return idx;
@@ -288,11 +233,11 @@ void sw_destroy(void) {
 	for (int i = 0; i < all_sw_size; i++) {
 		switch (all_sw[i].type) {
 			case SW_MULTI:
-				XPLMUnregisterCommandHandler(all_sw[i].cmd_toggle_l, sw_cb_l, 0, (void *)i);
-				XPLMUnregisterCommandHandler(all_sw[i].cmd_toggle_r, sw_cb_r, 0, (void *)i);
+				XPLMUnregisterCommandHandler(all_sw[i].cmd_toggle_l, sw_cb_l, 0, &all_sw[i]);
+				XPLMUnregisterCommandHandler(all_sw[i].cmd_toggle_r, sw_cb_r, 0, &all_sw[i]);
 				break;
 			default:
-				XPLMUnregisterCommandHandler(all_sw[i].cmd_toggle, sw_basic_cb, 0, (void *)i);
+				XPLMUnregisterCommandHandler(all_sw[i].cmd_toggle, sw_basic_cb, 0, &all_sw[i]);
 		}
 	}
 
