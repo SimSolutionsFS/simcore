@@ -9,6 +9,7 @@ typedef enum { SW_BASIC, SW_MULTI } sw_type_t;
 struct {
 	// Internal
 	sw_type_t type;
+	int index;
 
 	// Data for basic switches
 	int state;
@@ -69,21 +70,6 @@ switch_t sw_init(const char *dr_name, const char *dr_anim_name, const char *cmd_
 switch_t sw_init2(const char *dr_name, const char *dr_anim_name, const char *cmd_name_l, const char *cmd_desc_l,
 				  const char *cmd_name_r, const char *cmd_desc_r, int min_range, int max_range, int default_value,
 				  int starter, int spring);
-
-#if __STDC_VERSION__ == 202311L
-[[deprecated]]
-#endif
-int sw_get_state(switch_t inRefcon);
-
-#if __STDC_VERSION__ == 202311L
-[[deprecated]]
-#endif
-void sw_write_state(switch_t inRefcon, int inValue);
-
-#if __STDC_VERSION__ == 202311L
-[[deprecated]]
-#endif
-float sw_get_anim(switch_t inRefcon);
 
 /**
  * @brief Refreshes all registered switches.
