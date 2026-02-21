@@ -38,6 +38,13 @@ struct {
 typedef sw_t* switch_t;
 
 /**
+ * @brief Returns the necessary pointer for the updated persistence system. Yay!
+ *
+ * @return Pointer to the array that contains all switches.
+ */
+sw_t **sw_init(void);
+
+/**
  * @brief Initialize a basic, 2 position (on/off) switch
  *
  * @param dr_name Name of the switches state dataref. This is for systems, and should not be used for animations.
@@ -48,7 +55,7 @@ typedef sw_t* switch_t;
  *
  * @return An ID for the switch.
  */
-switch_t sw_init(const char *dr_name, const char *dr_anim_name, const char *cmd_name, const char *cmd_desc, int spring);
+switch_t sw_new(const char *dr_name, const char *dr_anim_name, const char *cmd_name, const char *cmd_desc, int spring);
 
 /**
  * @brief Initialize a switch with multiple positions.
@@ -67,7 +74,7 @@ switch_t sw_init(const char *dr_name, const char *dr_anim_name, const char *cmd_
  *
  * @return An ID for the switch.
  */
-switch_t sw_init2(const char *dr_name, const char *dr_anim_name, const char *cmd_name_l, const char *cmd_desc_l,
+switch_t sw_new2(const char *dr_name, const char *dr_anim_name, const char *cmd_name_l, const char *cmd_desc_l,
 				  const char *cmd_name_r, const char *cmd_desc_r, int min_range, int max_range, int default_value,
 				  int starter, int spring);
 

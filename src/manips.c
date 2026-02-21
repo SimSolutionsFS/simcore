@@ -106,7 +106,7 @@ float sw_get_anim(void *inRefcon) {
 	return all_sw[(int)inRefcon].anim_pos;
 }
 
-switch_t sw_new(void) {
+switch_t sw_create_blank(void) {
 	int idx;
 	if (all_sw == NULL) {
 		// Allocate initial memory if the array doesn't already exist
@@ -131,9 +131,13 @@ switch_t sw_new(void) {
 	return &all_sw[idx];
 }
 
-switch_t sw_init(const char *dr_name, const char *dr_anim_name, const char *cmd_name, const char *cmd_desc, const int spring) {
+sw_t **sw_init() {
+	return &all_sw;
+}
+
+switch_t sw_new(const char *dr_name, const char *dr_anim_name, const char *cmd_name, const char *cmd_desc, const int spring) {
 	// Initialize the switch
-	sw_t *sw = sw_new();
+	sw_t *sw = sw_create_blank();
 	sw->type = SW_BASIC;
 	sw->spring = spring;
 
@@ -156,6 +160,8 @@ switch_t sw_init(const char *dr_name, const char *dr_anim_name, const char *cmd_
 		}
 		else {
 			sw->dr_state_exists = 1;
+			sw->state = dr_geti(&sw->dr_state);
+			sw->anim_pos = (float)sw->state;
 		}
 	}
 
@@ -184,12 +190,12 @@ switch_t sw_init(const char *dr_name, const char *dr_anim_name, const char *cmd_
 	return sw;
 }
 
-switch_t sw_init2(const char *dr_name, const char *dr_anim_name, const char *cmd_name_l, const char *cmd_desc_l,
+switch_t sw_new2(const char *dr_name, const char *dr_anim_name, const char *cmd_name_l, const char *cmd_desc_l,
 					   const char *cmd_name_r, const char *cmd_desc_r, const int min_range, const int max_range,
 					   const int default_value,
 					   const int starter, const int spring) {
 	// Initialize the switch
-	sw_t *sw = sw_new();
+	sw_t *sw = sw_create_blank();
 	sw->type = SW_MULTI;
 	sw->spring = spring;
 
@@ -229,6 +235,8 @@ switch_t sw_init2(const char *dr_name, const char *dr_anim_name, const char *cmd
 		}
 		else {
 			sw->dr_state_exists = 1;
+			sw->state = dr_geti(&sw->dr_state);
+			sw->anim_pos = (float)sw->state;
 		}
 	}
 
