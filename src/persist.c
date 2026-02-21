@@ -20,7 +20,16 @@
 #endif
 
 #define UPDATE_RATE_SEC 30
+#define PERSIST_DIST_LIM 5.0f
 double dist_to_save = -1;
+
+#ifdef WIN32
+#define ACCESS(x, y) _access(x, y)
+#define MKDIR(x) mkdir(x)
+#else
+#define ACCESS(x, y) access(x, y)
+#define MKDIR(x) mkdir(x, 0777)
+#endif
 
 // Flight loop stuff, important for stuff to run well
 XPLMFlightLoopID persist_fl;
@@ -32,8 +41,8 @@ float tmp_val_f;
 
 // Config settings & basic state stuff
 int *persist_enabled;
-int load_save = false;
-int finish_load = false;
+int load_save = 0;
+int finish_load = 0;
 
 // Datarefs for the current state of the aircraft.
 dr_t dr_acf_lat;
@@ -52,7 +61,6 @@ float acf_spd_mps;
 float acf_alt_ft;
 int eng_running;
 float eng_thro;
-float dist_lim = 5.0f;
 
 // Regular datarefs that we are going to try to sync
 static const char *sync_drs_i[] = {
@@ -103,9 +111,86 @@ xpd_font_face_t win_text_font;
 
 char win_vrb_text[512];
 
-void persist_load(void);
+// Flight loop that constantly loads the state of the aircraft (every UPDATE_RATE_SEC) and updates its status in the file.
+float persist_fl_ref(float elapsedMe, float elapsedSim, int counter, void *refcon) {
+	UNUSED(elapsedMe);
+	UNUSED(elapsedSim);
+	UNUSED(counter);
+	UNUSED(refcon);
 
-void persist_fl_start(void);
+	/*
+	for (int i = 0; i < sizeof(sync_drs_i) / sizeof(sync_drs_i[1]); i++) {
+		dr_find(&tmp_dr, "%s", sync_drs_i[i]);
+		conf_set_i(persist_conf, sync_drs_i[i], dr_geti(&tmp_dr));
+	}
+
+	for (int i = 0; i < sizeof(&sync_drs_f) / sizeof(&sync_drs_f[1]); i++) {
+		dr_find(&tmp_dr, "%s", sync_drs_f[i]);
+		conf_set_f(persist_conf, sync_drs_f[i], dr_getf(&tmp_dr));
+	}
+	*/
+
+	conf_set_f(persist_conf, "location/lat", dr_getf(&dr_acf_lat));
+	conf_set_f(persist_conf, "location/lon", dr_getf(&dr_acf_lon));
+	conf_set_f(persist_conf, "location/hdg", dr_getf(&dr_acf_hdg));
+	conf_set_f(persist_conf, "location/tas", dr_getf(&dr_acf_spd));
+	conf_set_f(persist_conf, "location/alt", dr_getf(&dr_acf_alt));
+	conf_set_i(persist_conf, "engine/running", dr_getf(&dr_eng_running));
+	conf_set_f(persist_conf, "engine/throttle", dr_getf(&dr_eng_thro));
+
+	conf_write_file(persist_conf, persist_fp);
+	return UPDATE_RATE_SEC;
+}
+
+// Loads the saved data into the sim.
+void persist_load_save(void) {
+	logMsg("Restoring state...");
+	for (int i = 0; i < sizeof(&sync_drs_i) / sizeof(sync_drs_i[1]); i++) {
+		dr_find(&tmp_dr, "%s", sync_drs_i[i]);
+		conf_get_i(persist_conf, sync_drs_i[i], &tmp_val_i);
+		dr_seti(&tmp_dr, tmp_val_i);
+	}
+
+	for (int i = 0; i < sizeof(&sync_drs_f) / sizeof(sync_drs_f[1]); i++) {
+		dr_find(&tmp_dr, "%s", sync_drs_f[i]);
+		conf_get_f(persist_conf, sync_drs_f[i], &tmp_val_f);
+		dr_setf(&tmp_dr, tmp_val_f);
+	}
+
+	XPLMPlaceUserAtLocation(
+		acf_lat,
+		acf_lon,
+		acf_alt_ft,
+		acf_true_hdg,
+		acf_spd_mps
+	);
+
+	if (eng_running == 1) {
+		XPLMCommandOnce(cmd_find("sim/operation/auto_start"));
+	}
+
+	dr_setf(&dr_eng_thro, eng_thro);
+
+	float tmp_pk_brake;
+	conf_get_f(persist_conf, "sim/cockpit2/controls/wheel_brake_ratio", &tmp_pk_brake);
+	if (tmp_pk_brake > 0.5) {
+		XPLMCommandOnce(cmd_find("sim/flight_controls/brakes_toggle_max"));
+	}
+}
+
+// Start the flight loop that constantly updates the current position
+void persist_fl_start(void) {
+	// Create a flight loop to constantly refresh stuff
+	XPLMCreateFlightLoop_t persistenceFLParams = {
+		sizeof(XPLMCreateFlightLoop_t),
+		xplm_FlightLoop_Phase_AfterFlightModel,
+		persist_fl_ref,
+		NULL
+	};
+
+	persist_fl = XPLMCreateFlightLoop(&persistenceFLParams);
+	XPLMScheduleFlightLoop(persist_fl, UPDATE_RATE_SEC, 1);
+}
 
 int kill_win = 0;
 XPLMFlightLoopID kill_fl;
@@ -153,7 +238,7 @@ int pmpt_win_cb(XPLMWindowID inWindowID, int x, int y, XPLMMouseStatus inMouse, 
 	if (20 < y && y < 55) {
 		if (20 < x && x < 150) {
 			// Load the previous save and start the system.
-			persist_load();
+			persist_load_save();
 			persist_fl_start();
 			kill_win = 1;
 		}
@@ -165,7 +250,6 @@ int pmpt_win_cb(XPLMWindowID inWindowID, int x, int y, XPLMMouseStatus inMouse, 
 		else if (320 < x && x < 450) {
 			// Disable the system.
 			persist_enabled = 0;
-			persist_enabled = false;
 			kill_win = 1;
 		}
 	}
@@ -205,7 +289,7 @@ void pmpt_win_create(void) {
 	};
 
 	kill_fl = XPLMCreateFlightLoop(&persistenceFLParams);
-	XPLMScheduleFlightLoop(kill_fl, -1, true);
+	XPLMScheduleFlightLoop(kill_fl, -1, 1);
 
 	// Create window object
 	xpd_win_new(&pmpt_win, WIN_W, WIN_H);
@@ -219,119 +303,10 @@ void pmpt_win_create(void) {
 	xpd_win_resize_lims(&pmpt_win, WIN_W, WIN_H, WIN_W, WIN_H);
 }
 
-// Flight loop that constantly loads the state of the aircraft (every UPDATE_RATE_SEC) and updates its status in the file.
-float persist_ref(float elapsedMe, float elapsedSim, int counter, void *refcon) {
-	UNUSED(elapsedMe);
-	UNUSED(elapsedSim);
-	UNUSED(counter);
-	UNUSED(refcon);
-
-	for (int i = 0; i < sizeof(sync_drs_i) / sizeof(sync_drs_i[1]); i++) {
-		dr_find(&tmp_dr, "%s", sync_drs_i[i]);
-		conf_set_i(persist_conf, sync_drs_i[i], dr_geti(&tmp_dr));
-	}
-
-	for (int i = 0; i < sizeof(sync_drs_f) / sizeof(sync_drs_f[1]); i++) {
-		dr_find(&tmp_dr, "%s", sync_drs_f[i]);
-		conf_set_f(persist_conf, sync_drs_f[i], dr_getf(&tmp_dr));
-	}
-
-	conf_set_f(persist_conf, "location/lat", dr_getf(&dr_acf_lat));
-	conf_set_f(persist_conf, "location/lon", dr_getf(&dr_acf_lon));
-	conf_set_f(persist_conf, "location/hdg", dr_getf(&dr_acf_hdg));
-	conf_set_f(persist_conf, "location/tas", dr_getf(&dr_acf_spd));
-	conf_set_f(persist_conf, "location/alt", dr_getf(&dr_acf_alt));
-	conf_set_i(persist_conf, "engine/running", dr_getf(&dr_eng_running));
-	conf_set_f(persist_conf, "engine/throttle", dr_getf(&dr_eng_thro));
-
-	conf_write_file(persist_conf, persist_fp);
-	return UPDATE_RATE_SEC;
-}
-
-// Start the flight loop that constantly updates the current position
-void persist_fl_start(void) {
-	// Create a flight loop to constantly refresh stuff
-	XPLMCreateFlightLoop_t persistenceFLParams = {
-		sizeof(XPLMCreateFlightLoop_t),
-		xplm_FlightLoop_Phase_AfterFlightModel,
-		persist_ref,
-		NULL
-	};
-
-	persist_fl = XPLMCreateFlightLoop(&persistenceFLParams);
-	XPLMScheduleFlightLoop(persist_fl, UPDATE_RATE_SEC, true);
-}
-
-// Loads the saved data into the sim.
-void persist_load(void) {
-	logMsg("Restoring state...");
-	for (int i = 0; i < sizeof(sync_drs_i) / sizeof(sync_drs_i[1]); i++) {
-		dr_find(&tmp_dr, "%s", sync_drs_i[i]);
-		conf_get_i(persist_conf, sync_drs_i[i], &tmp_val_i);
-		dr_seti(&tmp_dr, tmp_val_i);
-	}
-
-	for (int i = 0; i < sizeof(sync_drs_f) / sizeof(sync_drs_f[1]); i++) {
-		dr_find(&tmp_dr, "%s", sync_drs_f[i]);
-		conf_get_f(persist_conf, sync_drs_f[i], &tmp_val_f);
-		dr_setf(&tmp_dr, tmp_val_f);
-	}
-
-	XPLMPlaceUserAtLocation(
-		acf_lat,
-		acf_lon,
-		acf_alt_ft,
-		acf_true_hdg,
-		acf_spd_mps
-	);
-
-	if (eng_running == 1) {
-		XPLMCommandOnce(cmd_find("sim/operation/auto_start"));
-	}
-
-	dr_setf(&dr_eng_thro, eng_thro);
-
-	float tmp_pk_brake;
-	conf_get_f(persist_conf, "sim/cockpit2/controls/wheel_brake_ratio", &tmp_pk_brake);
-	if (tmp_pk_brake > 0.5) {
-		XPLMCommandOnce(cmd_find("sim/flight_controls/brakes_toggle_max"));
-	}
-}
-
-// Runs when we should start the persistance system
-// We might want to defer this until the dialog box is closed (if it opened)
-void persist_start(void) {
-	if (load_save) {
-		conf_get_d(persist_conf, "location/lat", &acf_lat);
-		conf_get_d(persist_conf, "location/lon", &acf_lon);
-		conf_get_f(persist_conf, "location/hdg", &acf_true_hdg);
-		conf_get_f(persist_conf, "location/tas", &acf_spd_mps);
-		conf_get_f(persist_conf, "location/alt", &acf_alt_ft);
-		conf_get_i(persist_conf, "engine/running", &eng_running);
-		conf_get_f(persist_conf, "engine/throttle", &eng_thro);
-
-		dist_to_save = MET2NM(
-			gc_distance(GEO_POS2(acf_lat, acf_lon), GEO_POS2(dr_getf(&dr_acf_lat), dr_getf(&dr_acf_lon))));
-		logMsg("We are %fnm from the last save! Currently at %f, %f", dist_to_save, dr_getf(&dr_acf_lat),
-			   dr_getf(&dr_acf_lon));
-
-		if (dist_to_save <= dist_lim) {
-			persist_load();
-			persist_fl_start();
-		}
-		else {
-			pmpt_win_create();
-		}
-	}
-	else {
-		persist_fl_start();
-	}
-}
-
-// Runs when the aircraft first starts.
-void persist_init(float dist_lim_in, int *persist_enabled_in) {
-	dist_lim = dist_lim_in;
-	persist_enabled = persist_enabled_in;
+void persist_init(char *persist_drs_i[64], char *persist_drs_f[64], int *in_persist_enabled) {
+	//sync_drs_i = persist_drs_i;
+	//sync_drs_f = persist_drs_f;
+	persist_enabled = in_persist_enabled;
 
 	// Start finding path to save
 	persist_fp = malloc(sizeof(char) * 512);
@@ -347,17 +322,44 @@ void persist_init(float dist_lim_in, int *persist_enabled_in) {
 	xpd_font_load(&win_text_font, win_text_font_path, 18);
 	free(win_header_font_pth);
 	free(win_text_font_path);
+}
 
+// Runs when we should start the persistance system
+// We might want to defer this until the dialog box is closed (if it opened)
+void persist_begin(void) {
+	if (load_save) {
+		conf_get_d(persist_conf, "location/lat", &acf_lat);
+		conf_get_d(persist_conf, "location/lon", &acf_lon);
+		conf_get_f(persist_conf, "location/hdg", &acf_true_hdg);
+		conf_get_f(persist_conf, "location/tas", &acf_spd_mps);
+		conf_get_f(persist_conf, "location/alt", &acf_alt_ft);
+		conf_get_i(persist_conf, "engine/running", &eng_running);
+		conf_get_f(persist_conf, "engine/throttle", &eng_thro);
+
+		dist_to_save = MET2NM(
+			gc_distance(GEO_POS2(acf_lat, acf_lon), GEO_POS2(dr_getf(&dr_acf_lat), dr_getf(&dr_acf_lon))));
+		logMsg("We are %fnm from the last save! Currently at %f, %f", dist_to_save, dr_getf(&dr_acf_lat),
+			   dr_getf(&dr_acf_lon));
+
+		if (dist_to_save <= PERSIST_DIST_LIM) {
+			persist_load_save();
+			persist_fl_start();
+		}
+		else {
+			pmpt_win_create();
+		}
+	}
+	else {
+		persist_fl_start();
+	}
+}
+
+// Runs when the aircraft first starts.
+void persist_on_load(void) {
 	// Check to see if the DA40 folder exists, if not create it.
-#ifdef WIN32
-	if (_access(persist_fp, R_OK) != 0) {
+	if (ACCESS(persist_fp, R_OK) != 0) {
 		logMsg("Save directory does not exist. Creating!");
-		const int check = mkdir(persist_fp);
-#else
-	if (access(persist_fp, R_OK) != 0) {
-		logMsg("Save directory does not exist. Creating!");
-		const int check = mkdir(persist_fp, 0777);
-#endif
+		const int check = MKDIR(persist_fp);
 		const int errsv = errno;
 		if (check != 0) {
 			logMsg("Attempted to create directory with error code %i. The attempted path was %s.", errsv, persist_fp);
@@ -390,17 +392,13 @@ void persist_init(float dist_lim_in, int *persist_enabled_in) {
 		logMsg("Persistence system enabled.");
 
 		// Attempt to fetch a save, and create a new one if it does not exist
-#ifdef WIN32
-		if (_access(persist_fp, F_OK) == 0) {
-#else
-		if (access(persist_fp, F_OK) == 0) {
-#endif
-			load_save = true;
+		if (ACCESS(persist_fp, F_OK) == 0) {
+			load_save = 1;
 			logMsg("Save data found!");
 			persist_conf = conf_read_file(persist_fp, NULL);
 		}
 		else {
-			load_save = false;
+			load_save = 0;
 			logMsg("Save data not found!");
 			persist_conf = conf_create_empty();
 		}
@@ -414,7 +412,7 @@ void persist_init(float dist_lim_in, int *persist_enabled_in) {
 		dr_find(&dr_eng_running, "sim/flightmodel/engine/ENGN_running");
 		dr_find(&dr_eng_thro, "sim/flightmodel/engine/ENGN_thro");
 
-		persist_start();
+		persist_begin();
 	}
 }
 
