@@ -135,11 +135,15 @@ sw_t **sw_init() {
 	return &all_sw;
 }
 
-switch_t sw_new(const char *dr_name, const char *dr_anim_name, const char *cmd_name, const char *cmd_desc, const int spring) {
+switch_t sw_new(char *dr_name, const char *dr_anim_name, const char *cmd_name, const char *cmd_desc, const int spring) {
 	// Initialize the switch
 	sw_t *sw = sw_create_blank();
 	sw->type = SW_BASIC;
 	sw->spring = spring;
+	sw->ref = dr_name;
+
+	if (spring == 0)
+		ASSERT(dr_name != NULL);
 
 	// Register commands
 	if (cmd_desc == NULL) {
@@ -190,7 +194,7 @@ switch_t sw_new(const char *dr_name, const char *dr_anim_name, const char *cmd_n
 	return sw;
 }
 
-switch_t sw_new2(const char *dr_name, const char *dr_anim_name, const char *cmd_name_l, const char *cmd_desc_l,
+switch_t sw_new2(char *dr_name, const char *dr_anim_name, const char *cmd_name_l, const char *cmd_desc_l,
 					   const char *cmd_name_r, const char *cmd_desc_r, const int min_range, const int max_range,
 					   const int default_value,
 					   const int starter, const int spring) {
@@ -198,8 +202,10 @@ switch_t sw_new2(const char *dr_name, const char *dr_anim_name, const char *cmd_
 	sw_t *sw = sw_create_blank();
 	sw->type = SW_MULTI;
 	sw->spring = spring;
+	sw->ref = dr_name;
 
-	assert(!(spring && starter));
+	ASSERT(!(spring && starter));
+	ASSERT(dr_name != NULL);
 
 	sw->state = default_value;
 	sw->min = min_range;
@@ -280,4 +286,9 @@ void sw_destroy(void) {
 
 	// Free all memory
 	free(all_sw);
+}
+
+
+int sw_get_array_size(void) {
+	return all_sw_size;
 }

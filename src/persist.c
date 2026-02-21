@@ -40,7 +40,6 @@ int tmp_val_i;
 float tmp_val_f;
 
 // Config settings & basic state stuff
-int *persist_enabled;
 int load_save = 0;
 int finish_load = 0;
 
@@ -63,35 +62,7 @@ int eng_running;
 float eng_thro;
 
 // Regular datarefs that we are going to try to sync
-static const char *sync_drs_i[] = {
-	"DA40/Lights/Spot1_Switch",
-	"DA40/Lights/Spot2_Switch",
-	"DA40/Lights/Spot3_Switch",
-	"DA40/Switches/Avionics",
-	"DA40/Switches/Master",
-	"DA40/Switches/ECU/ECU_Voter",
-	"DA40/Switches/ECU/Engine_Master",
-	"DA40/Switches/ECU/Fuel_Pumps",
-	"DA40/Switches/Emergency_Switch",
-	"DA40/Switches/Emergency_Switch_Guard",
-	"DA40/Fuel/XFRSwitch",
-	"DA40/Fuel/FuelValve",
-	"DA40/Switches/Pitot_Heat",
-	"DA40/Switches/Landing_Lights",
-	"DA40/Switches/Taxi_Lights",
-	"DA40/Switches/Position_Lights",
-	"DA40/Switches/Strobe_Lights",
-	"DA40/Cabin/Defrost",
-	"DA40/Cabin/Heat",
-	"DA40/Switches/Ess_Bus",
-	"DA40/Ground/ShowCovers"
-};
-
-static const char *sync_drs_f[] = {
-	"DA40/Switches/Lighting/Instrument",
-	"DA40/Switches/Lighting/Flood",
-	"sim/cockpit2/controls/wheel_brake_ratio"
-};
+sw_t **sync_sw;
 
 /*
  * Window stuff if we have to prompt.
@@ -118,17 +89,11 @@ float persist_fl_ref(float elapsedMe, float elapsedSim, int counter, void *refco
 	UNUSED(counter);
 	UNUSED(refcon);
 
-	/*
-	for (int i = 0; i < sizeof(sync_drs_i) / sizeof(sync_drs_i[1]); i++) {
-		dr_find(&tmp_dr, "%s", sync_drs_i[i]);
-		conf_set_i(persist_conf, sync_drs_i[i], dr_geti(&tmp_dr));
+	for (int i = 0; i < sw_get_array_size(); i++) {
+		if (!(*sync_sw)[i].spring) {
+			conf_set_i(persist_conf, (*sync_sw)[i].ref, (*sync_sw)[i].state);
+		}
 	}
-
-	for (int i = 0; i < sizeof(&sync_drs_f) / sizeof(&sync_drs_f[1]); i++) {
-		dr_find(&tmp_dr, "%s", sync_drs_f[i]);
-		conf_set_f(persist_conf, sync_drs_f[i], dr_getf(&tmp_dr));
-	}
-	*/
 
 	conf_set_f(persist_conf, "location/lat", dr_getf(&dr_acf_lat));
 	conf_set_f(persist_conf, "location/lon", dr_getf(&dr_acf_lon));
@@ -145,16 +110,10 @@ float persist_fl_ref(float elapsedMe, float elapsedSim, int counter, void *refco
 // Loads the saved data into the sim.
 void persist_load_save(void) {
 	logMsg("Restoring state...");
-	for (int i = 0; i < sizeof(&sync_drs_i) / sizeof(sync_drs_i[1]); i++) {
-		dr_find(&tmp_dr, "%s", sync_drs_i[i]);
-		conf_get_i(persist_conf, sync_drs_i[i], &tmp_val_i);
-		dr_seti(&tmp_dr, tmp_val_i);
-	}
-
-	for (int i = 0; i < sizeof(&sync_drs_f) / sizeof(sync_drs_f[1]); i++) {
-		dr_find(&tmp_dr, "%s", sync_drs_f[i]);
-		conf_get_f(persist_conf, sync_drs_f[i], &tmp_val_f);
-		dr_setf(&tmp_dr, tmp_val_f);
+	for (int i = 0; i < sw_get_array_size(); i++) {
+		if (!(*sync_sw)[i].spring) {
+			conf_get_i(persist_conf, (*sync_sw)[i].ref, &(*sync_sw)[i].state);
+		}
 	}
 
 	XPLMPlaceUserAtLocation(
@@ -220,9 +179,6 @@ void pmpt_win_render(XPLMWindowID in_window_id, void *inRefcon) {
 
 	xpd_draw_rect(170, 20, 130, 35, WIN_CLR_BUT_SEC);
 	xpd_text_draw(&win_text_font, "No", 235, 28, XPD_ALIGN_C, XPD_COLOR_WHITE);
-
-	xpd_draw_rect(320, 20, 130, 35, WIN_CLR_BUT_SEC);
-	xpd_text_draw(&win_text_font, "Disable", 385, 28, XPD_ALIGN_C, XPD_COLOR_WHITE);
 }
 
 int pmpt_win_cb(XPLMWindowID inWindowID, int x, int y, XPLMMouseStatus inMouse, void *inRefcon) {
@@ -245,11 +201,6 @@ int pmpt_win_cb(XPLMWindowID inWindowID, int x, int y, XPLMMouseStatus inMouse, 
 		else if (170 < x && x < 300) {
 			// Don't load the previous save, but still start the system.
 			persist_fl_start();
-			kill_win = 1;
-		}
-		else if (320 < x && x < 450) {
-			// Disable the system.
-			persist_enabled = 0;
 			kill_win = 1;
 		}
 	}
@@ -303,17 +254,15 @@ void pmpt_win_create(void) {
 	xpd_win_resize_lims(&pmpt_win, WIN_W, WIN_H, WIN_W, WIN_H);
 }
 
-void persist_init(char *persist_drs_i[64], char *persist_drs_f[64], int *in_persist_enabled) {
-	//sync_drs_i = persist_drs_i;
-	//sync_drs_f = persist_drs_f;
-	persist_enabled = in_persist_enabled;
+void persist_init(sw_t **in_sync_sw, const char *in_folder_pth) {
+	sync_sw = in_sync_sw;
 
 	// Start finding path to save
 	persist_fp = malloc(sizeof(char) * 512);
 
 	XPLMGetPrefsPath(persist_fp);
 	persist_fp[strlen(persist_fp) - 28] = '\0';
-	persist_fp = xpd_tools_constr(persist_fp, "/DA40/");
+	persist_fp = xpd_tools_constr(persist_fp, in_folder_pth);
 
 	// Load fonts
 	char *win_header_font_pth = xpd_tools_constr(xpd_tools_xp_fp(), "/Resources/fonts/Roboto-Bold.ttf");
@@ -388,39 +337,35 @@ void persist_on_load(void) {
 	//free(liv_pth); DON'T UNCOMMENT THIS OR ELSE WINDOWS WILL CRASH. THIS REMAINS HERE HAS A REMINDER TO THE FUTURE TRAVELERS OF THIS CODE.
 
 	// Do rest of loading
-	if (persist_enabled) {
-		logMsg("Persistence system enabled.");
+	logMsg("Persistence system enabled.");
 
-		// Attempt to fetch a save, and create a new one if it does not exist
-		if (ACCESS(persist_fp, F_OK) == 0) {
-			load_save = 1;
-			logMsg("Save data found!");
-			persist_conf = conf_read_file(persist_fp, NULL);
-		}
-		else {
-			load_save = 0;
-			logMsg("Save data not found!");
-			persist_conf = conf_create_empty();
-		}
-
-		// Load some state datarefs
-		dr_find(&dr_acf_lat, "sim/flightmodel/position/latitude");
-		dr_find(&dr_acf_lon, "sim/flightmodel/position/longitude");
-		dr_find(&dr_acf_hdg, "sim/flightmodel/position/true_psi");
-		dr_find(&dr_acf_spd, "sim/flightmodel/position/true_airspeed");
-		dr_find(&dr_acf_alt, "sim/flightmodel/position/elevation");
-		dr_find(&dr_eng_running, "sim/flightmodel/engine/ENGN_running");
-		dr_find(&dr_eng_thro, "sim/flightmodel/engine/ENGN_thro");
-
-		persist_begin();
+	// Attempt to fetch a save, and create a new one if it does not exist
+	if (ACCESS(persist_fp, F_OK) == 0) {
+		load_save = 1;
+		logMsg("Save data found!");
+		persist_conf = conf_read_file(persist_fp, NULL);
 	}
+	else {
+		load_save = 0;
+		logMsg("Save data not found!");
+		persist_conf = conf_create_empty();
+	}
+
+	// Load some state datarefs
+	dr_find(&dr_acf_lat, "sim/flightmodel/position/latitude");
+	dr_find(&dr_acf_lon, "sim/flightmodel/position/longitude");
+	dr_find(&dr_acf_hdg, "sim/flightmodel/position/true_psi");
+	dr_find(&dr_acf_spd, "sim/flightmodel/position/true_airspeed");
+	dr_find(&dr_acf_alt, "sim/flightmodel/position/elevation");
+	dr_find(&dr_eng_running, "sim/flightmodel/engine/ENGN_running");
+	dr_find(&dr_eng_thro, "sim/flightmodel/engine/ENGN_thro");
+
+	persist_begin();
 }
 
 // Kill everything we created when the sim shuts down.
 void persist_stop(void) {
-	if (persist_enabled) {
-		XPLMDestroyFlightLoop(persist_fl);
-	}
+	XPLMDestroyFlightLoop(persist_fl);
 
 	free(persist_fp);
 	conf_free(persist_conf);
