@@ -143,7 +143,7 @@ switch_t sw_new(const char *dr_name, const char *dr_anim_name, const char *cmd_n
 
 	// Register commands
 	if (cmd_desc == NULL) {
-		cmd_desc = "";
+		cmd_desc = cmd_name;
 	}
 
 	sw->cmd_toggle = XPLMFindCommand(cmd_name);
@@ -207,11 +207,11 @@ switch_t sw_new2(const char *dr_name, const char *dr_anim_name, const char *cmd_
 	sw->starter = starter;
 
 	if (cmd_desc_l == NULL) {
-		cmd_desc_l = "";
+		cmd_desc_l = cmd_name_l;
 	}
 
 	if (cmd_desc_r == NULL) {
-		cmd_desc_r = "";
+		cmd_desc_r = cmd_name_r;
 	}
 
 	// Register commands
