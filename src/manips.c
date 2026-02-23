@@ -102,6 +102,14 @@ void sw_ref(void) {
 }
 
 // Callbacks to update the state of the switch. Used by X-Plane and other stakeholders
+int sw_get_state(void *inRefcon) {
+	return all_sw[(int)inRefcon].state;
+}
+
+void sw_set_state(void *inRefcon, int in_num) {
+	all_sw[(int)inRefcon].state = in_num;
+}
+
 float sw_get_anim(void *inRefcon) {
 	return all_sw[(int)inRefcon].anim_pos;
 }
@@ -160,7 +168,25 @@ switch_t sw_new(char *dr_name, const char *dr_anim_name, const char *cmd_name, c
 	if (dr_name != NULL) {
 		unsigned int result = dr_find(&sw->dr_state, "%s", dr_name);
 		if (result == 0) {
-			dr_create_i(&sw->dr_state, &sw->state, 1, "%s", dr_name);
+			XPLMRegisterDataAccessor(
+				dr_name,
+				xplmType_Int,
+				0,
+				sw_get_state,
+				sw_set_state,
+				NULL,
+				NULL,
+				NULL,
+				NULL,
+				NULL,
+				NULL,
+				NULL,
+				NULL,
+				NULL,
+				NULL,
+				(void *)sw->index,
+				NULL
+			);
 		}
 		else {
 			sw->dr_state_exists = 1;
@@ -237,7 +263,25 @@ switch_t sw_new2(char *dr_name, const char *dr_anim_name, const char *cmd_name_l
 	if (dr_name != NULL) {
 		unsigned int result = dr_find(&sw->dr_state, "%s", dr_name);
 		if (result == 0) {
-			dr_create_i(&sw->dr_state, &sw->state, 1, "%s", dr_name);
+			XPLMRegisterDataAccessor(
+				dr_name,
+				xplmType_Int,
+				0,
+				sw_get_state,
+				sw_set_state,
+				NULL,
+				NULL,
+				NULL,
+				NULL,
+				NULL,
+				NULL,
+				NULL,
+				NULL,
+				NULL,
+				NULL,
+				(void *)sw->index,
+				NULL
+			);
 		}
 		else {
 			sw->dr_state_exists = 1;
