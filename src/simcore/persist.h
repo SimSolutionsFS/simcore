@@ -3,6 +3,10 @@
 
 #include "simcore/manips.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 /**
  * @brief Initializes the persistence system.
  *
@@ -20,5 +24,9 @@ void persist_on_load(void);
  * @brief Unregisters the flight loop registered in persist_on_load().
  */
 void persist_stop(void);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif

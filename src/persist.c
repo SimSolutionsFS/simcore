@@ -292,15 +292,14 @@ void persist_begin(void) {
 
 		if (dist_to_save <= PERSIST_DIST_LIM) {
 			persist_load_save();
-			persist_fl_start();
 		}
 		else {
 			pmpt_win_create();
+			return;
 		}
 	}
-	else {
-		persist_fl_start();
-	}
+
+	persist_fl_start();
 }
 
 // Runs when the aircraft first starts.

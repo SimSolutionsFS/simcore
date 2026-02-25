@@ -53,7 +53,7 @@ typedef struct {
  * @param path File path to load from
  * @param size Size of font face to use
  */
-void xpd_font_load(xpd_font_face_t *font, const char *path, const int size);
+void xpd_font_load(xpd_font_face_t *font, const char *path, int size);
 
 inline void xpd_font_load2(xpd_font_face_t *font, const char *root, const char *filename, const int size) {
 	char *fnt_pth_tmp = xpd_tools_constr(root, filename);
