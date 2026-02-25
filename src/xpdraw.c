@@ -103,7 +103,7 @@ void xpd_draw_line(int start_x, int start_y, int end_x, int end_y, xpd_color_t c
 }
 
 void xpd_draw_texture2(xpd_texture_t *texture, int left, int bottom, int width, int height, xpd_color_t color,
-					   bool flipped) {
+					   int flipped) {
 	glColor4f(color.red, color.green, color.blue, color.alpha);
 
 	if (width == 0) {
@@ -135,7 +135,7 @@ void xpd_draw_texture2(xpd_texture_t *texture, int left, int bottom, int width, 
 }
 
 void xpd_draw_texture(xpd_texture_t *texture, int left, int bottom, int width, int height, xpd_color_t color) {
-	xpd_draw_texture2(texture, left, bottom, width, height, color, false);
+	xpd_draw_texture2(texture, left, bottom, width, height, color, 0);
 }
 
 void xpd_draw_rotated_texture(xpd_texture_t *texture, double angle, int left, int bottom, int width, int height, int rx,

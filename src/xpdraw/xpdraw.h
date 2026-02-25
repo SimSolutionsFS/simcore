@@ -88,6 +88,14 @@ void xpd_set_anchor(int newAnchor_x, int newAnchor_y);
  */
 void xpd_draw_triangle(int x, int y, int width, int height, xpd_color_t color);
 
+/**
+ * @brief TODO: Draw a circle with the specified parameters
+ *
+ * @param left Left side of the circle
+ * @param bottom Bottom side of the circle
+ * @param r Radius of the circle (NOT diameter!)
+ * @param color Color of the circle
+ */
 void xpd_draw_circle(int left, int bottom, int r, xpd_color_t color);
 
 /**
@@ -154,8 +162,7 @@ void xpd_draw_line(int start_x, int start_y, int end_x, int end_y, xpd_color_t c
  * @param flipped Flips the texture vertically, if true
  */
 void xpd_draw_texture2(xpd_texture_t *texture, int left, int bottom, int width, int height, xpd_color_t color,
-					   bool flipped);
-
+					   int flipped);
 
 /**
  * @brief Draw a mirrored version of a texture; used by fonts

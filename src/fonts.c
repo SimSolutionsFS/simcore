@@ -2,13 +2,13 @@
 
 #include <assert.h>
 
-bool fonts_init = false;
+int fonts_init = 0;
 FT_Library ft;
 
 void xpd_font_load(xpd_font_face_t *font, const char *path, const int size) {
-	if (fonts_init == false) {
+	if (fonts_init == 0) {
 		FT_Init_FreeType(&ft);
-		fonts_init = true;
+		fonts_init = 1;
 	}
 
 	FT_New_Face(ft, path, 0, &font->ftFace);
