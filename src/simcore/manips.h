@@ -4,6 +4,10 @@
 #include <XPLMUtilities.h>
 #include <acfutils/dr.h>
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 typedef enum { SW_BASIC, SW_MULTI } sw_type_t;
 
 struct {
@@ -36,7 +40,7 @@ struct {
  * Previously, this was an int that represented an index in an array.
  * Currently, this represents a pointer to that array entry.
  */
-typedef sw_t* switch_t;
+typedef sw_t *switch_t;
 
 /**
  * @brief Returns the necessary pointer for the updated persistence system. Yay!
@@ -71,13 +75,12 @@ switch_t sw_new(char *dr_name, const char *dr_anim_name, const char *cmd_name, c
  * @param max_range Maximum value the switch can be.
  * @param default_value Default value of the switch.
  * @param starter If true, the last position will be spring-loaded.
- * @param spring Does the switch return to 0 once released? Cannot be used with `starter`.
  *
  * @return An ID for the switch.
  */
 switch_t sw_new2(char *dr_name, const char *dr_anim_name, const char *cmd_name_l, const char *cmd_desc_l,
-				  const char *cmd_name_r, const char *cmd_desc_r, int min_range, int max_range, int default_value,
-				  int starter, int spring);
+				 const char *cmd_name_r, const char *cmd_desc_r, int min_range, int max_range, int default_value,
+				 int starter);
 
 /**
  * @brief Refreshes all registered switches.
@@ -93,5 +96,9 @@ int sw_get_array_size(void);
  * @brief Destroys all registered switches.
  */
 void sw_destroy(void);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif //LIBSWITCH_H

@@ -70,7 +70,8 @@ int sw_cb_r(XPLMCommandRef inCommand, XPLMCommandPhase inPhase, void *inRefcon) 
 		all_sw[i].act_gain = SWITCH_GAIN;
 		all_sw[i].state += 1;
 	}
-	else if ((inPhase == xplm_CommandEnd) && ((all_sw[i].starter) || (all_sw[i].spring)) && (all_sw[i].state == all_sw[i].max)) {
+	else if ((inPhase == xplm_CommandEnd) && ((all_sw[i].starter) || (all_sw[i].spring)) && (
+				 all_sw[i].state == all_sw[i].max)) {
 		all_sw[i].act_gain = -SWITCH_GAIN;
 		all_sw[i].state -= 1;
 	}
@@ -125,8 +126,9 @@ switch_t sw_create_blank(void) {
 	else {
 		// Expand the array to support our new switch
 		all_sw_size++;
-		all_sw = realloc(all_sw, sizeof(sw_t) * all_sw_size);
-		assert(all_sw);
+		sw_t *all_sw_tmp = realloc(all_sw, sizeof(sw_t) * all_sw_size);
+		assert(all_sw_tmp != NULL);
+		all_sw = all_sw_tmp;
 		idx = all_sw_size - 1;
 	}
 
@@ -150,8 +152,9 @@ switch_t sw_new(char *dr_name, const char *dr_anim_name, const char *cmd_name, c
 	sw->spring = spring;
 	sw->ref = dr_name;
 
-	if (spring == 0)
+	if (spring == 0) {
 		ASSERT(dr_name != NULL);
+	}
 
 	// Register commands
 	if (cmd_desc == NULL) {
@@ -221,16 +224,14 @@ switch_t sw_new(char *dr_name, const char *dr_anim_name, const char *cmd_name, c
 }
 
 switch_t sw_new2(char *dr_name, const char *dr_anim_name, const char *cmd_name_l, const char *cmd_desc_l,
-					   const char *cmd_name_r, const char *cmd_desc_r, const int min_range, const int max_range,
-					   const int default_value,
-					   const int starter, const int spring) {
+				 const char *cmd_name_r, const char *cmd_desc_r, const int min_range, const int max_range,
+				 const int default_value, const int starter) {
 	// Initialize the switch
 	sw_t *sw = sw_create_blank();
 	sw->type = SW_MULTI;
-	sw->spring = spring;
+	sw->spring = 0;
 	sw->ref = dr_name;
 
-	ASSERT(!(spring && starter));
 	ASSERT(dr_name != NULL);
 
 	sw->state = default_value;
