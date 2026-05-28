@@ -40,7 +40,7 @@ struct {
  * Previously, this was an int that represented an index in an array.
  * Currently, this represents a pointer to that array entry.
  */
-typedef sw_t *switch_t;
+typedef int switch_t;
 
 /**
  * @brief Returns the necessary pointer for the updated persistence system. Yay!
@@ -96,6 +96,27 @@ int sw_get_array_size(void);
  * @brief Destroys all registered switches.
  */
 void sw_destroy(void);
+
+/**
+ *
+ * @param in_sw Fetches the current state of a switch
+ * @return The state (position) of the switch
+ */
+int sw_get_state(switch_t in_sw);
+
+/**
+ *
+ * @param in_sw Moves the switch to a new state
+ * @param in_num State to move the switch to
+ */
+void sw_set_state(switch_t in_sw, int in_num);
+
+/**
+ *
+ * @param in_sw Gets the current position of the switch's 3D animation
+ * @return Current animation-friendly position
+ */
+float sw_get_anim(switch_t in_sw);
 
 #ifdef __cplusplus
 }

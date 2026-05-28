@@ -102,20 +102,33 @@ void sw_ref(void) {
 	}
 }
 
-// Callbacks to update the state of the switch. Used by X-Plane and other stakeholders
-int sw_get_state(void *inRefcon) {
+// Callbacks to update the state of the switch. Used by X-Plane
+int sw_get_state_int(void *inRefcon) {
 	return all_sw[(int)inRefcon].state;
 }
 
-void sw_set_state(void *inRefcon, int in_num) {
+void sw_set_state_int(void *inRefcon, int in_num) {
 	all_sw[(int)inRefcon].state = in_num;
 }
 
-float sw_get_anim(void *inRefcon) {
+float sw_get_anim_int(void *inRefcon) {
 	return all_sw[(int)inRefcon].anim_pos;
 }
 
-switch_t sw_create_blank(void) {
+// Callbacks to update & get the state of the switch. Used instead of pointers to prevent issues
+int sw_get_state(switch_t inRefcon) {
+	return all_sw[inRefcon].state;
+}
+
+float sw_get_anim(switch_t inRefcon) {
+	return all_sw[inRefcon].anim_pos;
+}
+
+void sw_set_state(switch_t inRefcon, int in_num) {
+	all_sw[inRefcon].state = in_num;
+}
+
+sw_t *sw_create_blank(void) {
 	int idx;
 	if (all_sw == NULL) {
 		// Allocate initial memory if the array doesn't already exist
@@ -175,8 +188,8 @@ switch_t sw_new(char *dr_name, const char *dr_anim_name, const char *cmd_name, c
 				dr_name,
 				xplmType_Int,
 				0,
-				sw_get_state,
-				sw_set_state,
+				sw_get_state_int,
+				sw_set_state_int,
 				NULL,
 				NULL,
 				NULL,
@@ -205,7 +218,7 @@ switch_t sw_new(char *dr_name, const char *dr_anim_name, const char *cmd_name, c
 			0,
 			NULL,
 			NULL,
-			sw_get_anim,
+			sw_get_anim_int,
 			NULL,
 			NULL,
 			NULL,
@@ -220,7 +233,7 @@ switch_t sw_new(char *dr_name, const char *dr_anim_name, const char *cmd_name, c
 		);
 	}
 
-	return sw;
+	return sw->index;
 }
 
 switch_t sw_new2(char *dr_name, const char *dr_anim_name, const char *cmd_name_l, const char *cmd_desc_l,
@@ -268,8 +281,8 @@ switch_t sw_new2(char *dr_name, const char *dr_anim_name, const char *cmd_name_l
 				dr_name,
 				xplmType_Int,
 				0,
-				sw_get_state,
-				sw_set_state,
+				sw_get_state_int,
+				sw_set_state_int,
 				NULL,
 				NULL,
 				NULL,
@@ -298,7 +311,7 @@ switch_t sw_new2(char *dr_name, const char *dr_anim_name, const char *cmd_name_l
 			0,
 			NULL,
 			NULL,
-			sw_get_anim,
+			sw_get_anim_int,
 			NULL,
 			NULL,
 			NULL,
@@ -313,7 +326,7 @@ switch_t sw_new2(char *dr_name, const char *dr_anim_name, const char *cmd_name_l
 		);
 	}
 
-	return sw;
+	return sw->index;
 }
 
 void sw_destroy(void) {
