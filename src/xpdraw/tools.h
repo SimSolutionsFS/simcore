@@ -1,6 +1,6 @@
 /*
  * tools.h - Minor tools/functions
- * Copyright 2024 Ian Ward
+ * Copyright 2026 Ian Ward
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
