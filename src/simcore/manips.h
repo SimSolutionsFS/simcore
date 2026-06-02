@@ -1,3 +1,19 @@
+/*
+ * manips.h - Basic switch handling system for X-Plane aircraft
+ * Copyright 2026 Ian Ward
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+*/
 #ifndef LIBSWITCH_H
 #define LIBSWITCH_H
 
@@ -98,23 +114,26 @@ int sw_get_array_size(void);
 void sw_destroy(void);
 
 /**
+ * @brief Fetch the current state of a switch
  *
- * @param in_sw Fetches the current state of a switch
+ * @param in_sw Switch to fetch the state of
  * @return The state (position) of the switch
  */
 int sw_get_state(switch_t in_sw);
 
 /**
+ * @brief Set a new state for a switch
  *
- * @param in_sw Moves the switch to a new state
+ * @param in_sw Switch to set a new state to
  * @param in_num State to move the switch to
  */
 void sw_set_state(switch_t in_sw, int in_num);
 
 /**
+ * @brief Fetch the current animation state of a switch
  *
- * @param in_sw Gets the current position of the switch's 3D animation
- * @return Current animation-friendly position
+ * @param in_sw Switch to fetch the animation state of
+ * @return Current animation state
  */
 float sw_get_anim(switch_t in_sw);
 

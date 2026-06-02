@@ -96,7 +96,7 @@ void xpd_draw_triangle(int x, int y, int width, int height, xpd_color_t color);
  * @param r Radius of the circle (NOT diameter!)
  * @param color Color of the circle
  */
-void xpd_draw_circle(int left, int bottom, int r, xpd_color_t color);
+//void xpd_draw_circle(int left, int bottom, int r, xpd_color_t color);
 
 /**
  * @brief Draw a rectangle with the specified parameters
@@ -200,6 +200,13 @@ void xpd_draw_rotated_texture(xpd_texture_t *texture, double angle, int left, in
  */
 void xpd_load_texture(xpd_texture_t *texture, const char *filename);
 
+/**
+ * @brief Load a texture, but combine root and filename to create the filepath
+ *
+ * @param texture Pointer to the texture
+ * @param root First half of filepath
+ * @param filename Second half of filepath
+ */
 inline void xpd_load_texture2(xpd_texture_t *texture, const char *root, const char *filename) {
 	char *txt_pth_tmp = xpd_tools_constr(root, filename);
 	xpd_load_texture(texture, txt_pth_tmp);

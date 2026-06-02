@@ -38,14 +38,29 @@ typedef struct {
 } xpd_win_t;
 
 // Dummy callbacks adapted from https://developer.x-plane.com/code-sample/hello-world-sdk-3/
+/**
+ * @brief DO NOT USE
+ */
 void base_draw(XPLMWindowID in_window_id, void *in_refcon);
 
+/**
+ * @brief DO NOT USE
+ */
 int base_mouse(XPLMWindowID in_window_id, int x, int y, int is_down, void *in_refcon);
 
+/**
+ * @brief DO NOT USE
+ */
 XPLMCursorStatus base_cursor(XPLMWindowID in_window_id, int x, int y, void *in_refcon);
 
+/**
+ * @brief DO NOT USE
+ */
 int base_wheel(XPLMWindowID in_window_id, int x, int y, int wheel, int clicks, void *in_refcon);
 
+/**
+ * @brief DO NOT USE
+ */
 void base_key(XPLMWindowID in_window_id, char key, XPLMKeyFlags flags, char virtual_key, void *in_refcon,
 			  int losing_focus);
 
