@@ -61,9 +61,6 @@ float acf_alt_ft;
 int eng_running;
 float eng_thro;
 
-// Regular datarefs that we are going to try to sync
-sw_t **sync_sw;
-
 /*
  * Window stuff if we have to prompt.
  * Unused if no prompt necessary.
@@ -90,8 +87,11 @@ float persist_fl_ref(float elapsedMe, float elapsedSim, int counter, void *refco
 	UNUSED(refcon);
 
 	for (int i = 0; i < sw_get_array_size(); i++) {
-		if (!(*sync_sw)[i].spring) {
-			conf_set_i(persist_conf, (*sync_sw)[i].ref, (*sync_sw)[i].state);
+		sw_t tmp = sw_get_idx(i);
+
+		if (!tmp.spring) {
+			ASSERT(tmp.ref != NULL);
+			conf_set_i(persist_conf, tmp.ref, tmp.state);
 		}
 	}
 
@@ -111,8 +111,11 @@ float persist_fl_ref(float elapsedMe, float elapsedSim, int counter, void *refco
 void persist_load_save(void) {
 	logMsg("Restoring state...");
 	for (int i = 0; i < sw_get_array_size(); i++) {
-		if (!(*sync_sw)[i].spring) {
-			conf_get_i(persist_conf, (*sync_sw)[i].ref, &(*sync_sw)[i].state);
+		sw_t tmp = sw_get_idx(i);
+
+		if (!tmp.spring) {
+			ASSERT(tmp.ref != NULL);
+			conf_get_i(persist_conf, tmp.ref, &tmp.state);
 		}
 	}
 
@@ -254,9 +257,7 @@ void pmpt_win_create(void) {
 	xpd_win_resize_lims(&pmpt_win, WIN_W, WIN_H, WIN_W, WIN_H);
 }
 
-void persist_init(sw_t **in_sync_sw, const char *in_folder_pth) {
-	sync_sw = in_sync_sw;
-
+void persist_init(const char *in_folder_pth) {
 	// Start finding path to save
 	persist_fp = malloc(sizeof(char) * 512);
 
