@@ -89,8 +89,7 @@ float persist_fl_ref(float elapsedMe, float elapsedSim, int counter, void *refco
 	for (int i = 0; i < sw_get_array_size(); i++) {
 		sw_t tmp = sw_get_idx(i);
 
-		if (!tmp.spring) {
-			ASSERT(tmp.ref != NULL);
+		if ((!tmp.spring) && (tmp.ref != NULL)) {
 			conf_set_i(persist_conf, tmp.ref, tmp.state);
 		}
 	}
@@ -113,7 +112,7 @@ void persist_load_save(void) {
 	for (int i = 0; i < sw_get_array_size(); i++) {
 		sw_t tmp = sw_get_idx(i);
 
-		if (!tmp.spring) {
+		if ((!tmp.spring) && (tmp.ref != NULL)) {
 			ASSERT(tmp.ref != NULL);
 			conf_get_i(persist_conf, tmp.ref, &tmp.state);
 		}
