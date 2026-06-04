@@ -70,8 +70,7 @@ int sw_cb_r(XPLMCommandRef inCommand, XPLMCommandPhase inPhase, void *inRefcon) 
 		all_sw[i].act_gain = SWITCH_GAIN;
 		all_sw[i].state += 1;
 	}
-	else if ((inPhase == xplm_CommandEnd) && ((all_sw[i].starter) || (all_sw[i].spring)) && (
-				 all_sw[i].state == all_sw[i].max)) {
+	else if ((inPhase == xplm_CommandEnd) && (all_sw[i].spring) && (all_sw[i].state == all_sw[i].max)) {
 		all_sw[i].act_gain = -SWITCH_GAIN;
 		all_sw[i].state -= 1;
 	}
@@ -126,6 +125,11 @@ float sw_get_anim(switch_t inRefcon) {
 
 void sw_set_state(switch_t inRefcon, int in_num) {
 	all_sw[inRefcon].state = in_num;
+}
+
+// Fetch a specific switch given an index. Used by persist.c
+sw_t sw_get_idx(const int idx) {
+	return all_sw[idx];
 }
 
 sw_t *sw_create_blank(void) {
@@ -238,7 +242,7 @@ switch_t sw_new(char *dr_name, const char *dr_anim_name, const char *cmd_name, c
 
 switch_t sw_new2(char *dr_name, const char *dr_anim_name, const char *cmd_name_l, const char *cmd_desc_l,
 				 const char *cmd_name_r, const char *cmd_desc_r, const int min_range, const int max_range,
-				 const int default_value, const int starter) {
+				 const int default_value, const int spring) {
 	// Initialize the switch
 	sw_t *sw = sw_create_blank();
 	sw->type = SW_MULTI;
@@ -250,7 +254,7 @@ switch_t sw_new2(char *dr_name, const char *dr_anim_name, const char *cmd_name_l
 	sw->state = default_value;
 	sw->min = min_range;
 	sw->max = max_range;
-	sw->starter = starter;
+	sw->spring = spring;
 
 	if (cmd_desc_l == NULL) {
 		cmd_desc_l = cmd_name_l;

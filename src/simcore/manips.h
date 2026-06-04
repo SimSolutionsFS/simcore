@@ -45,7 +45,6 @@ struct {
 	// Data for multi-position switches
 	int min;
 	int max;
-	int starter;
 	XPLMCommandRef cmd_toggle_l;
 	XPLMCommandRef cmd_toggle_r;
 } typedef sw_t;
@@ -90,13 +89,13 @@ switch_t sw_new(char *dr_name, const char *dr_anim_name, const char *cmd_name, c
  * @param min_range Minimum value the switch can be.
  * @param max_range Maximum value the switch can be.
  * @param default_value Default value of the switch.
- * @param starter If true, the last position will be spring-loaded.
+ * @param spring If true, the last position will be spring-loaded.
  *
  * @return An ID for the switch.
  */
 switch_t sw_new2(char *dr_name, const char *dr_anim_name, const char *cmd_name_l, const char *cmd_desc_l,
 				 const char *cmd_name_r, const char *cmd_desc_r, int min_range, int max_range, int default_value,
-				 int starter);
+				 int spring);
 
 /**
  * @brief Refreshes all registered switches.
@@ -136,6 +135,14 @@ void sw_set_state(switch_t in_sw, int in_num);
  * @return Current animation state
  */
 float sw_get_anim(switch_t in_sw);
+
+/**
+ * @brief Fetch a switch given an index
+ *
+ * @param idx Index to return
+ * @return Returned switch
+ */
+sw_t sw_get_idx(int idx);
 
 #ifdef __cplusplus
 }
