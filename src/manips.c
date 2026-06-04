@@ -125,6 +125,9 @@ float sw_get_anim(switch_t inRefcon) {
 
 void sw_set_state(switch_t inRefcon, int in_num) {
 	all_sw[inRefcon].state = in_num;
+	if (all_sw[inRefcon].dr_state_exists) {
+		dr_seti(&all_sw[inRefcon].dr_state, in_num);
+	}
 }
 
 // Fetch a specific switch given an index. Used by persist.c

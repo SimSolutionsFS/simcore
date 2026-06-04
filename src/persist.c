@@ -113,8 +113,8 @@ void persist_load_save(void) {
 		sw_t tmp = sw_get_idx(i);
 
 		if ((!tmp.spring) && (tmp.ref != NULL)) {
-			ASSERT(tmp.ref != NULL);
 			conf_get_i(persist_conf, tmp.ref, &tmp.state);
+			sw_set_state(i, tmp.state);
 		}
 	}
 
