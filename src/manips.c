@@ -161,10 +161,6 @@ sw_t *sw_create_blank(void) {
 	return &all_sw[idx];
 }
 
-sw_t **sw_init() {
-	return &all_sw;
-}
-
 switch_t sw_new(char *dr_name, const char *dr_anim_name, const char *cmd_name, const char *cmd_desc, const int spring) {
 	// Initialize the switch
 	sw_t *sw = sw_create_blank();

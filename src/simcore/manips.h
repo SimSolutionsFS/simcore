@@ -58,13 +58,6 @@ struct {
 typedef int switch_t;
 
 /**
- * @brief Returns the necessary pointer for the updated persistence system. Yay!
- *
- * @return Pointer to the array that contains all switches.
- */
-sw_t **sw_init(void);
-
-/**
  * @brief Initialize a basic, 2 position (on/off) switch
  *
  * @param dr_name Name of the switches state dataref. This is for systems, and should not be used for animations.
