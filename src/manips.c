@@ -98,6 +98,14 @@ void sw_ref(void) {
 		else if (all_sw[i].anim_pos != (float)all_sw[i].state) {
 			all_sw[i].anim_pos = (float)all_sw[i].state;
 		}
+
+		// If the switch is tied to a pre-existing dataref, ensure the state correctly reflects the position of the switch
+		if (all_sw[i].dr_state_exists) {
+			int curr_state = dr_geti(&all_sw[i].dr_state);
+			if (curr_state != all_sw[i].state) {
+				all_sw[i].state = curr_state;
+			}
+		}
 	}
 }
 
