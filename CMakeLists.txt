@@ -19,7 +19,7 @@ add_definitions(
 	-DXPLM420
 	-DXPLM430
 	-DXPLM440
-	-DXPLM4
+	-DXPLMPG1
 )
 
 # Include source code
@@ -28,19 +28,17 @@ add_library(simcore
 	${CMAKE_CURRENT_SOURCE_DIR}/src/simcore/manips.h
 	${CMAKE_CURRENT_SOURCE_DIR}/src/persist.c
 	${CMAKE_CURRENT_SOURCE_DIR}/src/simcore/persist.h
+	${CMAKE_CURRENT_SOURCE_DIR}/src/draw_tools.c
+	${CMAKE_CURRENT_SOURCE_DIR}/src/simcore/draw_tools.h
 
 	${CMAKE_CURRENT_SOURCE_DIR}/src/xpdraw.c
 	${CMAKE_CURRENT_SOURCE_DIR}/src/xpdraw/xpdraw.h
-	${CMAKE_CURRENT_SOURCE_DIR}/src/xpdraw2.c
-	${CMAKE_CURRENT_SOURCE_DIR}/src/xpdraw/xpdraw2.h
 	${CMAKE_CURRENT_SOURCE_DIR}/src/windows.c
 	${CMAKE_CURRENT_SOURCE_DIR}/src/xpdraw/windows.h
 	${CMAKE_CURRENT_SOURCE_DIR}/src/tools.c
 	${CMAKE_CURRENT_SOURCE_DIR}/src/xpdraw/tools.h
 	${CMAKE_CURRENT_SOURCE_DIR}/src/fonts.c
 	${CMAKE_CURRENT_SOURCE_DIR}/src/xpdraw/fonts.h
-	${CMAKE_CURRENT_SOURCE_DIR}/src/fonts2.c
-	${CMAKE_CURRENT_SOURCE_DIR}/src/xpdraw/fonts2.h
 )
 
 # Include directories for both SimCore & its dependencies
