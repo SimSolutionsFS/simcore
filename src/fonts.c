@@ -5,7 +5,14 @@
 int fonts_init = 0;
 FT_Library ft;
 
-void xpd_font_load(xpd_font_face_t *font, const char *path, const int size) {
+void xpd_font_load(xpd_font_face_t *font, const char *fmt, const int size, ...) {
+	va_list args;
+	va_start(args, fmt);
+
+	char *path = malloc( sizeof(char) * 256);
+	vsnprintf(path, 256, fmt, args);
+	va_end(args);
+
 	if (fonts_init == 0) {
 		FT_Init_FreeType(&ft);
 		fonts_init = 1;
@@ -29,6 +36,7 @@ void xpd_font_load(xpd_font_face_t *font, const char *path, const int size) {
 	}
 
 	FT_Done_Face(font->ftFace);
+	free(path);
 }
 
 int xpd_text_length(xpd_font_face_t *font, const char *text) {

@@ -46,12 +46,6 @@ void xpd_draw_triangle(int x, int y, int width, int height, xpd_color_t color) {
 	}
 }
 
-void xpd_draw_circle(int left, int bottom, int r, xpd_color_t color) {
-	glColor4f(color.red, color.green, color.blue, color.alpha);
-
-	// TODO: Implement this.
-}
-
 void xpd_draw_rect(int left, int bottom, int width, int height, xpd_color_t color) {
 	glColor4f(color.red, color.green, color.blue, color.alpha);
 
@@ -172,7 +166,14 @@ void xpd_draw_rotated_texture(xpd_texture_t *texture, double angle, int left, in
 	glBindTexture(GL_TEXTURE_2D, 0);
 }
 
-void xpd_load_texture(xpd_texture_t *texture, const char *filename) {
+void xpd_load_texture(xpd_texture_t *texture, const char *fmt, ...) {
+	va_list args;
+	va_start(args, fmt);
+
+	char *filename = malloc( sizeof(char) * 256);
+	vsnprintf(filename, 256, fmt, args);
+	va_end(args);
+
 	// Get a buffer from the passed file
 	int width, height, nrChannels; // Do we need to store nrChannels?
 	unsigned char *texDat = stbi_load(filename, &width, &height, &nrChannels, 4);
@@ -182,4 +183,6 @@ void xpd_load_texture(xpd_texture_t *texture, const char *filename) {
 
 	xpd_load_buffer(texture, texDat, width, height, GL_RGBA);
 	stbi_image_free(texDat);
+
+	free(filename);
 }

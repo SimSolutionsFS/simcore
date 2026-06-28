@@ -89,16 +89,6 @@ void xpd_set_anchor(int newAnchor_x, int newAnchor_y);
 void xpd_draw_triangle(int x, int y, int width, int height, xpd_color_t color);
 
 /**
- * @brief TODO: Draw a circle with the specified parameters
- *
- * @param left Left side of the circle
- * @param bottom Bottom side of the circle
- * @param r Radius of the circle (NOT diameter!)
- * @param color Color of the circle
- */
-//void xpd_draw_circle(int left, int bottom, int r, xpd_color_t color);
-
-/**
  * @brief Draw a rectangle with the specified parameters
  *
  * @param left X position of the rectangle
@@ -196,9 +186,9 @@ void xpd_draw_rotated_texture(xpd_texture_t *texture, double angle, int left, in
  * @brief Load a texture
  *
  * @param texture Pointer to the xpdraw texture
- * @param filename File path to load
+ * @param fmt File path to load
  */
-void xpd_load_texture(xpd_texture_t *texture, const char *filename);
+void xpd_load_texture(xpd_texture_t *texture, const char *fmt, ...) __attribute__ ((format(printf, 2, 3)));
 
 /**
  * @brief Load a texture, but combine root and filename to create the filepath
@@ -207,6 +197,7 @@ void xpd_load_texture(xpd_texture_t *texture, const char *filename);
  * @param root First half of filepath
  * @param filename Second half of filepath
  */
+[[deprecated]]
 inline void xpd_load_texture2(xpd_texture_t *texture, const char *root, const char *filename) {
 	char *txt_pth_tmp = xpd_tools_constr(root, filename);
 	xpd_load_texture(texture, txt_pth_tmp);
