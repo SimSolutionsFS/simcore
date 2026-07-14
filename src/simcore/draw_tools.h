@@ -85,7 +85,7 @@ void sc_draw_rect2(float left, float bottom, float width, float height, uint32_t
  * @param color Color of the line
  * @param thickness Thickness of the line
  */
-void xpd_draw_line(float start_x, float start_y, float end_x, float end_y, uint32_t color, float thickness);
+void sc_draw_line(float start_x, float start_y, float end_x, float end_y, uint32_t color, float thickness);
 
 #ifdef __cplusplus
 }

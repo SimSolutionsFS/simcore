@@ -57,3 +57,11 @@ void sc_draw_rect2(float left, float bottom, float width, float height, uint32_t
 	sc_draw_rect(left, bottom + height - borderSize, width, borderSize, borderColor);
 	sc_draw_rect(left, bottom, width, borderSize, borderColor);
 }
+
+void sc_draw_line(float start_x, float start_y, float end_x, float end_y, uint32_t color, float thickness) {
+	XPLMVertex_t vlist[4] = {
+		{start_x, start_y},
+		{end_x, end_y},
+	};
+	XPLMLinesWithWidth(color, thickness, vlist, 2);
+}
