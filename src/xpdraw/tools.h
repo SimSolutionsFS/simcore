@@ -28,6 +28,7 @@ extern "C" {
  * @param str2
  * @return char*
  */
+[[deprecated]]
 char *xpd_tools_constr(const char *str1, const char *str2);
 
 /**
