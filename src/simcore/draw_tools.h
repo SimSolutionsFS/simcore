@@ -17,9 +17,10 @@
 #ifndef DRAW_TOOLS_H
 #define DRAW_TOOLS_H
 
-#ifdef XPLMPG1
+#ifdef XPLM440
 #ifdef __cplusplus
 extern "C" {
+
 
 #endif
 

@@ -19,7 +19,6 @@ add_definitions(
 	-DXPLM420
 	-DXPLM430
 	-DXPLM440
-	-DXPLMPG1
 )
 
 # Include source code
