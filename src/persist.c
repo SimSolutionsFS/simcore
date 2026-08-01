@@ -67,10 +67,10 @@ float eng_thro;
 #define WIN_H 250
 #define WIN_W 600
 
-uint32_t COLOR_PRI;
-uint32_t COLOR_SEC;
-uint32_t COLOR_WHITE;
-uint32_t COLOR_BLACK;
+uint32_t SC_COLOR_PRI;
+uint32_t SC_COLOR_SEC;
+uint32_t SC_COLOR_WHITE;
+uint32_t SC_COLOR_BLACK;
 
 xpd_win_t pmpt_win;
 
@@ -165,22 +165,22 @@ void pmpt_win_render(XPLMWindowID in_window_id, void *inRefcon) {
 	float base_x = (float)windowLeft - 10;
 	float base_y = (float)windowBottom - 10;
 
-	sc_draw_rect(base_x, base_y, 600, 250, COLOR_BLACK);
-	sc_draw_rect(base_x, base_y + 200, 600, 50, COLOR_SEC);
-	XPLMFontDrawString(win_header_font, COLOR_WHITE, 39, base_x + 10, base_y + 214, "Restore your last state?",
+	sc_draw_rect(base_x, base_y, 600, 250, SC_COLOR_BLACK);
+	sc_draw_rect(base_x, base_y + 200, 600, 50, SC_COLOR_SEC);
+	XPLMFontDrawString(win_header_font, SC_COLOR_WHITE, 39, base_x + 10, base_y + 214, "Restore your last state?",
 					   xplm_JustLeft);
 
 	sprintf(win_vrb_text, "You are %.2f nm from your last session.", dist_to_save);
-	XPLMFontDrawString(win_text_font, COLOR_WHITE, 27, base_x + 15, base_y + 165, win_vrb_text, xplm_JustLeft);
-	XPLMFontDrawString(win_text_font, COLOR_WHITE, 27, base_x + 15, base_y + 115,
+	XPLMFontDrawString(win_text_font, SC_COLOR_WHITE, 27, base_x + 15, base_y + 165, win_vrb_text, xplm_JustLeft);
+	XPLMFontDrawString(win_text_font, SC_COLOR_WHITE, 27, base_x + 15, base_y + 115,
 					   "Would you like to restore your position and", xplm_JustLeft);
-	XPLMFontDrawString(win_text_font, COLOR_WHITE, 27, base_x + 15, base_y + 85, "general state?", xplm_JustLeft);
+	XPLMFontDrawString(win_text_font, SC_COLOR_WHITE, 27, base_x + 15, base_y + 85, "general state?", xplm_JustLeft);
 
-	sc_draw_rect(base_x + 20, base_y + 20, 130, 35, COLOR_PRI);
-	XPLMFontDrawString(win_text_font, COLOR_WHITE, 27, base_x + 85, base_y + 28, "Yes", xplm_JustCenter);
+	sc_draw_rect(base_x + 20, base_y + 20, 130, 35, SC_COLOR_PRI);
+	XPLMFontDrawString(win_text_font, SC_COLOR_WHITE, 27, base_x + 85, base_y + 28, "Yes", xplm_JustCenter);
 
-	sc_draw_rect(base_x + 170, base_y + 20, 130, 35, COLOR_SEC);
-	XPLMFontDrawString(win_text_font, COLOR_WHITE, 27, base_x + 235, base_y + 28, "No", xplm_JustCenter);
+	sc_draw_rect(base_x + 170, base_y + 20, 130, 35, SC_COLOR_SEC);
+	XPLMFontDrawString(win_text_font, SC_COLOR_WHITE, 27, base_x + 235, base_y + 28, "No", xplm_JustCenter);
 }
 
 int pmpt_win_cb(XPLMWindowID inWindowID, int x, int y, XPLMMouseStatus inMouse, void *inRefcon) {
@@ -265,10 +265,10 @@ void persist_init(const char *in_folder_pth) {
 	persist_fp = xpd_tools_constr(persist_fp, in_folder_pth);
 
 	// Load colors
-	COLOR_PRI = XPLMMakeColor(0.23f, 0.49f, 0.65f, 1);
-	COLOR_SEC = XPLMMakeColor(0.35f, 0.35f, 0.35f, 1);
-	COLOR_WHITE = XPLMMakeColor(1, 1, 1, 1);
-	COLOR_BLACK = XPLMMakeColor(0, 0, 0, 1);
+	SC_COLOR_PRI = XPLMMakeColor(0.23f, 0.49f, 0.65f, 1);
+	SC_COLOR_SEC = XPLMMakeColor(0.35f, 0.35f, 0.35f, 1);
+	SC_COLOR_WHITE = XPLMMakeColor(1, 1, 1, 1);
+	SC_COLOR_BLACK = XPLMMakeColor(0, 0, 0, 1);
 
 	// Load fonts
 	win_header_font = XPLMCreateFont(xplm_CharSetUnicode);
