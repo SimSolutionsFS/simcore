@@ -17,8 +17,6 @@
 #ifndef SIMCORE_PERSIST_H
 #define SIMCORE_PERSIST_H
 
-#include "simcore/manips.h"
-
 #ifdef __cplusplus
 extern "C" {
 #endif

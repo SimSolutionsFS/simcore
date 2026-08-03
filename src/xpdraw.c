@@ -170,7 +170,7 @@ void xpd_load_texture(xpd_texture_t *texture, const char *fmt, ...) {
 	va_list args;
 	va_start(args, fmt);
 
-	char *filename = malloc( sizeof(char) * 256);
+	char *filename = malloc(sizeof(char) * 256);
 	vsnprintf(filename, 256, fmt, args);
 	va_end(args);
 

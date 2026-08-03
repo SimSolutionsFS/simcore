@@ -10,8 +10,9 @@
 #include <acfutils/dr.h>
 #include <acfutils/geom.h>
 #include <acfutils/perf.h>
+#include <simcore/manips.h>
+#include <simcore/tools.h>
 #include <xpdraw/fonts.h>
-#include <xpdraw/tools.h>
 #include <xpdraw/windows.h>
 #include <xpdraw/xpdraw.h>
 
@@ -35,9 +36,6 @@ double dist_to_save = -1;
 XPLMFlightLoopID persist_fl;
 char *persist_fp;
 conf_t *persist_conf;
-dr_t tmp_dr;
-int tmp_val_i;
-float tmp_val_f;
 
 // Config settings & basic state stuff
 int load_save = 0;

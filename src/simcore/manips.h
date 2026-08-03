@@ -14,8 +14,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
 */
-#ifndef LIBSWITCH_H
-#define LIBSWITCH_H
+#ifndef SIMCORE_MANIPS_H
+#define SIMCORE_MANIPS_H
 
 #include <XPLMUtilities.h>
 #include <acfutils/dr.h>
@@ -62,7 +62,7 @@ typedef int switch_t;
  *
  * @param dr_name Name of the switches state dataref. This is for systems, and should not be used for animations.
  * @param dr_anim_name Name of the switch's animation dataref. This is for animations only, and should not be used for animations.
- * @param cmd_name Name of the switch's toggle command. This should be used in clickspots.
+ * @param cmd_name Name of the switch's toggle command. This should be used in click spots.
  * @param cmd_desc Description to show up in the X-Plane UI.
  * @param spring Does the switch return to 0 once released?
  *
@@ -75,9 +75,9 @@ switch_t sw_new(char *dr_name, const char *dr_anim_name, const char *cmd_name, c
  *
  * @param dr_name Name of the switches state dataref. This is for systems, and should not be used for animations.
  * @param dr_anim_name Name of the switch's animation dataref. This is for animations only, and should not be used for animations.
- * @param cmd_name_l Name of the switch's toggle command. This should be used in clickspots.
+ * @param cmd_name_l Name of the switch's toggle command. This should be used in click spots.
  * @param cmd_desc_l Description to show up in the X-Plane UI.
- * @param cmd_name_r Name of the switch's toggle command. This should be used in clickspots.
+ * @param cmd_name_r Name of the switch's toggle command. This should be used in click spots.
  * @param cmd_desc_r Description to show up in the X-Plane UI.
  * @param min_range Minimum value the switch can be.
  * @param max_range Maximum value the switch can be.
@@ -141,4 +141,4 @@ sw_t sw_get_idx(int idx);
 }
 #endif
 
-#endif //LIBSWITCH_H
+#endif //SIMCORE_MANIPS_H
