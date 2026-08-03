@@ -262,15 +262,11 @@ void persist_init(const char *in_folder_pth) {
 
 	XPLMGetPrefsPath(persist_fp);
 	persist_fp[strlen(persist_fp) - 28] = '\0';
-	persist_fp = xpd_tools_constr(persist_fp, in_folder_pth);
+	snprintf(persist_fp, sizeof(*persist_fp), "%s%s", persist_fp, in_folder_pth);
 
 	// Load fonts
-	char *win_header_font_pth = xpd_tools_constr(xpd_tools_xp_fp(), "/Resources/fonts/Roboto-Bold.ttf");
-	char *win_text_font_path = xpd_tools_constr(xpd_tools_xp_fp(), "/Resources/fonts/Roboto-Regular.ttf");
-	xpd_font_load(&win_header_font, win_header_font_pth, 26);
-	xpd_font_load(&win_text_font, win_text_font_path, 18);
-	free(win_header_font_pth);
-	free(win_text_font_path);
+	xpd_font_load(&win_header_font, "%s/Resources/fonts/Roboto-Bold.ttf", 26, tools_xp_fp());
+	xpd_font_load(&win_text_font, "%s/Resources/fonts/Roboto-Regular.ttf", 18, tools_xp_fp());
 }
 
 // Runs when we should start the persistance system
