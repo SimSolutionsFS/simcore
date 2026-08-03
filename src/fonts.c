@@ -9,7 +9,7 @@ void xpd_font_load(xpd_font_face_t *font, const char *fmt, const int size, ...) 
 	va_list args;
 	va_start(args, fmt);
 
-	char *path = malloc( sizeof(char) * 256);
+	char *path = malloc(sizeof(char) * 256);
 	vsnprintf(path, 256, fmt, args);
 	va_end(args);
 

@@ -17,7 +17,6 @@
 #ifndef XPDRAW_FONTS_H
 #define XPDRAW_FONTS_H
 
-#include <limits.h>
 #include <ft2build.h>
 #include FT_FREETYPE_H
 
@@ -50,25 +49,11 @@ typedef struct {
  * @brief Load a new font
  *
  * @param font Pointer to the font we are loading
- * @param fmt File path to load from
+ * @param fmt Formatted string
  * @param size Size of font face to use
+ * @param ... Arguments for formatted string
  */
 void xpd_font_load(xpd_font_face_t *font, const char *fmt, int size, ...) __attribute__ ((format(printf, 2, 4)));
-
-/**
- *	@brief Load a new font, but combine root and filename to create the filepath
- *
- * @param font Pointer to the font face
- * @param root First half of filepath
- * @param filename Second half of filepath
- * @param size Size of the font face
- */
-[[deprecated]]
-inline void xpd_font_load2(xpd_font_face_t *font, const char *root, const char *filename, const int size) {
-	char *fnt_pth_tmp = xpd_tools_constr(root, filename);
-	xpd_font_load(font, fnt_pth_tmp, size);
-	free(fnt_pth_tmp);
-}
 
 /**
  * @brief Returns the length of a string.

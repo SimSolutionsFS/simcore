@@ -16,9 +16,6 @@
 */
 #ifndef XPDRAW_H
 #define XPDRAW_H
-#include <stdlib.h>
-
-#include "tools.h"
 
 #if LIN
 #include <GL/gl.h>
@@ -186,23 +183,10 @@ void xpd_draw_rotated_texture(xpd_texture_t *texture, double angle, int left, in
  * @brief Load a texture
  *
  * @param texture Pointer to the xpdraw texture
- * @param fmt File path to load
+ * @param fmt Formatted string
+ * @param ... Arguments to fmt
  */
 void xpd_load_texture(xpd_texture_t *texture, const char *fmt, ...) __attribute__ ((format(printf, 2, 3)));
-
-/**
- * @brief Load a texture, but combine root and filename to create the filepath
- *
- * @param texture Pointer to the texture
- * @param root First half of filepath
- * @param filename Second half of filepath
- */
-[[deprecated]]
-inline void xpd_load_texture2(xpd_texture_t *texture, const char *root, const char *filename) {
-	char *txt_pth_tmp = xpd_tools_constr(root, filename);
-	xpd_load_texture(texture, txt_pth_tmp);
-	free(txt_pth_tmp);
-}
 
 #ifdef __cplusplus
 }
