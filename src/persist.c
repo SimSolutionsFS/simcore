@@ -22,7 +22,7 @@
 
 #define UPDATE_RATE_SEC 30
 #define PERSIST_DIST_LIM 5.0f
-double dist_to_save = -1;
+static double dist_to_save = -1;
 
 #ifdef WIN32
 #define ACCESS(x, y) _access(x, y)
@@ -33,31 +33,30 @@ double dist_to_save = -1;
 #endif
 
 // Flight loop stuff, important for stuff to run well
-XPLMFlightLoopID persist_fl;
-char *persist_fp;
-conf_t *persist_conf;
+static XPLMFlightLoopID persist_fl;
+static char *persist_fp;
+static conf_t *persist_conf;
 
 // Config settings & basic state stuff
-int load_save = 0;
-int finish_load = 0;
+static int load_save = 0;
 
 // Datarefs for the current state of the aircraft.
-dr_t dr_acf_lat;
-dr_t dr_acf_lon;
-dr_t dr_acf_hdg;
-dr_t dr_acf_spd;
-dr_t dr_acf_alt;
-dr_t dr_eng_running;
-dr_t dr_eng_thro;
+static dr_t dr_acf_lat;
+static dr_t dr_acf_lon;
+static dr_t dr_acf_hdg;
+static dr_t dr_acf_spd;
+static dr_t dr_acf_alt;
+static dr_t dr_eng_running;
+static dr_t dr_eng_thro;
 
 // ...and the values for those datarefs
-double acf_lat;
-double acf_lon;
-float acf_true_hdg;
-float acf_spd_mps;
-float acf_alt_ft;
-int eng_running;
-float eng_thro;
+static double acf_lat;
+static double acf_lon;
+static float acf_true_hdg;
+static float acf_spd_mps;
+static float acf_alt_ft;
+static int eng_running;
+static float eng_thro;
 
 /*
  * Window stuff if we have to prompt.
@@ -70,15 +69,13 @@ float eng_thro;
 #define WIN_CLR_BUT_PRI (xpd_color_t){ 0.23, 0.49, 0.65, 1 }
 #define WIN_CLR_BUT_SEC WIN_CLR_H
 
-xpd_win_t pmpt_win;
+static xpd_win_t pmpt_win;
 
-xpd_font_face_t win_header_font;
-xpd_font_face_t win_text_font;
-
-char win_vrb_text[512];
+static xpd_font_face_t win_header_font;
+static xpd_font_face_t win_text_font;
 
 // Flight loop that constantly loads the state of the aircraft (every UPDATE_RATE_SEC) and updates its status in the file.
-float persist_fl_ref(float elapsedMe, float elapsedSim, int counter, void *refcon) {
+static float persist_fl_ref(float elapsedMe, float elapsedSim, int counter, void *refcon) {
 	UNUSED(elapsedMe);
 	UNUSED(elapsedSim);
 	UNUSED(counter);
@@ -105,7 +102,7 @@ float persist_fl_ref(float elapsedMe, float elapsedSim, int counter, void *refco
 }
 
 // Loads the saved data into the sim.
-void persist_load_save(void) {
+static void persist_load_save(void) {
 	logMsg("Restoring state...");
 	for (int i = 0; i < sw_get_array_size(); i++) {
 		sw_t tmp = sw_get_idx(i);
@@ -138,7 +135,7 @@ void persist_load_save(void) {
 }
 
 // Start the flight loop that constantly updates the current position
-void persist_fl_start(void) {
+static void persist_fl_start(void) {
 	// Create a flight loop to constantly refresh stuff
 	XPLMCreateFlightLoop_t persistenceFLParams = {
 		sizeof(XPLMCreateFlightLoop_t),
@@ -151,11 +148,13 @@ void persist_fl_start(void) {
 	XPLMScheduleFlightLoop(persist_fl, UPDATE_RATE_SEC, 1);
 }
 
-int kill_win = 0;
-XPLMFlightLoopID kill_fl;
+static int kill_win = 0;
+static XPLMFlightLoopID kill_fl;
 
-void pmpt_win_render(XPLMWindowID in_window_id, void *inRefcon) {
+static void pmpt_win_render(XPLMWindowID in_window_id, void *inRefcon) {
 	UNUSED(inRefcon);
+
+	char win_vrb_text[512];
 
 	XPLMBindTexture2d(pmpt_win.texNum, 0);
 	glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, WIN_H, WIN_W, GL_RGBA, GL_UNSIGNED_BYTE, pmpt_win.buffer);
@@ -181,7 +180,7 @@ void pmpt_win_render(XPLMWindowID in_window_id, void *inRefcon) {
 	xpd_text_draw(&win_text_font, "No", 235, 28, XPD_ALIGN_C, XPD_COLOR_WHITE);
 }
 
-int pmpt_win_cb(XPLMWindowID inWindowID, int x, int y, XPLMMouseStatus inMouse, void *inRefcon) {
+static int pmpt_win_cb(XPLMWindowID inWindowID, int x, int y, XPLMMouseStatus inMouse, void *inRefcon) {
 	UNUSED(inMouse);
 	UNUSED(inRefcon);
 
@@ -215,7 +214,7 @@ int pmpt_win_cb(XPLMWindowID inWindowID, int x, int y, XPLMMouseStatus inMouse, 
  *
  * That is the only reason this flight loop exists.
  */
-float the_kill_fl_ref(float elapsedMe, float elapsedSim, int counter, void *refcon) {
+static float the_kill_fl_ref(float elapsedMe, float elapsedSim, int counter, void *refcon) {
 	UNUSED(elapsedMe);
 	UNUSED(elapsedSim);
 	UNUSED(counter);
@@ -230,7 +229,7 @@ float the_kill_fl_ref(float elapsedMe, float elapsedSim, int counter, void *refc
 	return -1;
 }
 
-void pmpt_win_create(void) {
+static void pmpt_win_create(void) {
 	// schedule the KILL flight loop.
 	XPLMCreateFlightLoop_t persistenceFLParams = {
 		sizeof(XPLMCreateFlightLoop_t),
@@ -269,7 +268,7 @@ void persist_init(const char *in_folder_pth) {
 
 // Runs when we should start the persistance system
 // We might want to defer this until the dialog box is closed (if it opened)
-void persist_begin(void) {
+static void persist_begin(void) {
 	if (load_save) {
 		conf_get_d(persist_conf, "location/lat", &acf_lat);
 		conf_get_d(persist_conf, "location/lon", &acf_lon);
@@ -298,13 +297,13 @@ void persist_begin(void) {
 
 // Runs when the aircraft first starts.
 void persist_on_load(void) {
-	// Check to see if the DA40 folder exists, if not create it.
+	// Check to see if the saves directory exists, if not create it.
 	if (ACCESS(persist_fp, R_OK) != 0) {
 		logMsg("Save directory does not exist. Creating!");
 		const int check = MKDIR(persist_fp);
-		const int errsv = errno;
+		const int err = errno;
 		if (check != 0) {
-			logMsg("Attempted to create directory with error code %i. The attempted path was %s.", errsv, persist_fp);
+			logMsg("Attempted to create directory with error code %i. The attempted path was %s.", err, persist_fp);
 			assert(check == 0);
 		}
 	}

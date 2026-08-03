@@ -64,7 +64,7 @@ static const xpd_texture_t xpd_texture_empty = {
  * @param height Height of buffer
  * @param format Format of buffer
  */
-void xpd_load_buffer(xpd_texture_t *texture, void *buffer, unsigned int width, unsigned int height, GLint format);
+void xpd_load_buffer(xpd_texture_t *texture, const void *buffer, unsigned int width, unsigned int height, GLint format);
 
 /**
  * @brief Sets the position of the 'anchor'. All future calls will be relative to this location if defined.
@@ -148,7 +148,7 @@ void xpd_draw_line(int start_x, int start_y, int end_x, int end_y, xpd_color_t c
  * @param color Color of the texture; defaults to white
  * @param flipped Flips the texture vertically, if true
  */
-void xpd_draw_texture2(xpd_texture_t *texture, int left, int bottom, int width, int height, xpd_color_t color,
+void xpd_draw_texture2(const xpd_texture_t *texture, int left, int bottom, int width, int height, xpd_color_t color,
 					   int flipped);
 
 /**
@@ -161,7 +161,7 @@ void xpd_draw_texture2(xpd_texture_t *texture, int left, int bottom, int width, 
  * @param height Height of the drawn texture; set to 0 to use the texture's height
  * @param color Color of the texture; defaults to white
  */
-void xpd_draw_texture(xpd_texture_t *texture, int left, int bottom, int width, int height, xpd_color_t color);
+void xpd_draw_texture(const xpd_texture_t *texture, int left, int bottom, int width, int height, xpd_color_t color);
 
 /**
  * @brief Draw a rotated texture
@@ -176,7 +176,8 @@ void xpd_draw_texture(xpd_texture_t *texture, int left, int bottom, int width, i
  * @param ry Y anchor to rotate around relative to the texture
  * @param color Color of the texture
  */
-void xpd_draw_rotated_texture(xpd_texture_t *texture, double angle, int left, int bottom, int width, int height, int rx,
+void xpd_draw_rotated_texture(const xpd_texture_t *texture, double angle, int left, int bottom, int width, int height,
+							  int rx,
 							  int ry, xpd_color_t color);
 
 /**

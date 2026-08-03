@@ -62,7 +62,7 @@ void xpd_font_load(xpd_font_face_t *font, const char *fmt, int size, ...) __attr
  * @param text Text to get the length of
  * @return int
  */
-int xpd_text_length(xpd_font_face_t *font, const char *text);
+int xpd_text_length(const xpd_font_face_t *font, const char *text);
 
 /**
  * @brief Function to draw text
@@ -74,7 +74,7 @@ int xpd_text_length(xpd_font_face_t *font, const char *text);
  * @param align Alignment of the text relative to x
  * @param color Color of the text; defaults to white
  */
-void xpd_text_draw(xpd_font_face_t *font, const char *text, int x, int y, xpd_text_align_t align,
+void xpd_text_draw(const xpd_font_face_t *font, const char *text, int x, int y, xpd_text_align_t align,
 				   xpd_color_t color);
 
 #ifdef __cplusplus

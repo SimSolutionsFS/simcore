@@ -2,8 +2,8 @@
 
 #include <assert.h>
 
-int fonts_init = 0;
-FT_Library ft;
+static int fonts_init = 0;
+static FT_Library ft;
 
 void xpd_font_load(xpd_font_face_t *font, const char *fmt, const int size, ...) {
 	va_list args;
@@ -39,7 +39,7 @@ void xpd_font_load(xpd_font_face_t *font, const char *fmt, const int size, ...) 
 	free(path);
 }
 
-int xpd_text_length(xpd_font_face_t *font, const char *text) {
+int xpd_text_length(const xpd_font_face_t *font, const char *text) {
 	int width = 0;
 
 	// Calculate the length of the string before drawing it
@@ -56,7 +56,7 @@ int xpd_text_length(xpd_font_face_t *font, const char *text) {
 	return width;
 }
 
-void xpd_text_draw(xpd_font_face_t *font, const char *text, int x, int y, xpd_text_align_t align,
+void xpd_text_draw(const xpd_font_face_t *font, const char *text, int x, int y, xpd_text_align_t align,
 				   xpd_color_t textColor) {
 	assert(font != NULL);
 
