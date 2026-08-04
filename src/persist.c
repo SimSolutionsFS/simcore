@@ -256,10 +256,12 @@ static void pmpt_win_create(void) {
 void persist_init(const char *in_folder_pth) {
 	// Start finding path to save
 	persist_fp = malloc(sizeof(char) * 512);
+	char *prefs_fp = malloc(sizeof(char) * 512);
 
-	XPLMGetPrefsPath(persist_fp);
-	persist_fp[strlen(persist_fp) - 28] = '\0';
-	snprintf(persist_fp, sizeof(*persist_fp), "%s%s", persist_fp, in_folder_pth);
+	XPLMGetPrefsPath(prefs_fp);
+	prefs_fp[strlen(prefs_fp) - 28] = '\0';
+	snprintf(persist_fp, sizeof(char) * 512, "%s%s", prefs_fp, in_folder_pth);
+	free(prefs_fp);
 
 	// Load fonts
 	xpd_font_load(&win_header_font, "%s/Resources/fonts/Roboto-Bold.ttf", 26, tools_xp_fp());
