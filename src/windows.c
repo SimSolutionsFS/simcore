@@ -88,6 +88,6 @@ void xpd_win_create2(xpd_win_t *inWindow, const char *title, int winLeft, int wi
 	XPLMSetWindowTitle(inWindow->windowID, title);
 }
 
-void xpd_win_resize_lims(xpd_win_t *inWindow, int minWidth, int minHeight, int maxWidth, int maxHeight) {
+void xpd_win_resize_lims(const xpd_win_t *inWindow, int minWidth, int minHeight, int maxWidth, int maxHeight) {
 	XPLMSetWindowResizingLimits(inWindow->windowID, minWidth - 20, minHeight - 20, maxWidth - 20, maxHeight - 20);
 }

@@ -49,7 +49,7 @@ void sc_draw_triangle(float x, float y, float width, float height, uint32_t colo
  * @param r Radius of the circle (NOT diameter!)
  * @param color Color of the circle
  */
-//void sc_draw_circle(int left, int bottom, int r, uint32_t color);
+void sc_draw_circle(int left, int bottom, int r, uint32_t color);
 
 /**
  * @brief Draw a rectangle with the specified parameters

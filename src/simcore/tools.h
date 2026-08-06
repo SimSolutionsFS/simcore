@@ -14,43 +14,33 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
 */
-#ifndef XPDRAW_TOOLS_H
-#define XPDRAW_TOOLS_H
+#ifndef SIMCORE_TOOLS_H
+#define SIMCORE_TOOLS_H
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
 /**
- * @brief Concentrate two C strings into one
- *
- * @param str1
- * @param str2
- * @return char*
- */
-[[deprecated]]
-char *xpd_tools_constr(const char *str1, const char *str2);
-
-/**
  * @brief Returns the plugins current path. Forces XPLM_USE_NATIVE_PATHS to true!
  *
  * @return char*
  */
-char *xpd_tools_plugin_fp();
+char *tools_plugin_fp(void);
 
 /**
  * @brief Returns the X-Plane instance's path. Forces XPLM_USE_NATIVE_PATHS to true!
  *
  * @return char*
  */
-char *xpd_tools_xp_fp();
+char *tools_xp_fp(void);
 
 /**
  * @brief Returns what major X-Plane version is running
  *
  * @return int
  */
-int xpd_tools_xp_ver();
+int tools_xp_ver(void);
 
 #ifdef __cplusplus
 }

@@ -9,11 +9,11 @@
 
 #define SWITCH_GAIN 0.2f
 
-sw_t *all_sw;
-int all_sw_size = 0;
+static sw_t *all_sw;
+static int all_sw_size = 0;
 
 // Switch Callbacks
-int sw_basic_cb(XPLMCommandRef inCommand, XPLMCommandPhase inPhase, void *inRefcon) {
+static int sw_basic_cb(XPLMCommandRef inCommand, XPLMCommandPhase inPhase, void *inRefcon) {
 	UNUSED(inCommand);
 
 	int i = (int)inRefcon;
@@ -40,7 +40,7 @@ int sw_basic_cb(XPLMCommandRef inCommand, XPLMCommandPhase inPhase, void *inRefc
 	return xplm_CommandContinue;
 }
 
-int sw_cb_l(XPLMCommandRef inCommand, XPLMCommandPhase inPhase, void *inRefcon) {
+static int sw_cb_l(XPLMCommandRef inCommand, XPLMCommandPhase inPhase, void *inRefcon) {
 	UNUSED(inCommand);
 
 	int i = (int)inRefcon;
@@ -61,7 +61,7 @@ int sw_cb_l(XPLMCommandRef inCommand, XPLMCommandPhase inPhase, void *inRefcon) 
 	return xplm_CommandContinue;
 }
 
-int sw_cb_r(XPLMCommandRef inCommand, XPLMCommandPhase inPhase, void *inRefcon) {
+static int sw_cb_r(XPLMCommandRef inCommand, XPLMCommandPhase inPhase, void *inRefcon) {
 	UNUSED(inCommand);
 
 	int i = (int)inRefcon;
@@ -110,15 +110,15 @@ void sw_ref(void) {
 }
 
 // Callbacks to update the state of the switch. Used by X-Plane
-int sw_get_state_int(void *inRefcon) {
+static int sw_get_state_int(void *inRefcon) {
 	return all_sw[(int)inRefcon].state;
 }
 
-void sw_set_state_int(void *inRefcon, int in_num) {
+static void sw_set_state_int(void *inRefcon, int in_num) {
 	all_sw[(int)inRefcon].state = in_num;
 }
 
-float sw_get_anim_int(void *inRefcon) {
+static float sw_get_anim_int(void *inRefcon) {
 	return all_sw[(int)inRefcon].anim_pos;
 }
 
@@ -143,7 +143,7 @@ sw_t sw_get_idx(const int idx) {
 	return all_sw[idx];
 }
 
-sw_t *sw_create_blank(void) {
+static sw_t *sw_create_blank(void) {
 	int idx;
 	if (all_sw == NULL) {
 		// Allocate initial memory if the array doesn't already exist

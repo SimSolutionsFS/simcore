@@ -1,6 +1,8 @@
 cmake_minimum_required(VERSION 3.21)
 project(simcore C)
 
+set(CMAKE_C_STANDARD 17)
+
 # CMake Settings
 set(CMAKE_C_FLAGS "-O3 -fPIC -pedantic -Wall")
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
@@ -29,13 +31,13 @@ add_library(simcore
 	${CMAKE_CURRENT_SOURCE_DIR}/src/simcore/persist.h
 	${CMAKE_CURRENT_SOURCE_DIR}/src/draw_tools.c
 	${CMAKE_CURRENT_SOURCE_DIR}/src/simcore/draw_tools.h
+	${CMAKE_CURRENT_SOURCE_DIR}/src/tools.c
+	${CMAKE_CURRENT_SOURCE_DIR}/src/simcore/tools.h
 
 	${CMAKE_CURRENT_SOURCE_DIR}/src/xpdraw.c
 	${CMAKE_CURRENT_SOURCE_DIR}/src/xpdraw/xpdraw.h
 	${CMAKE_CURRENT_SOURCE_DIR}/src/windows.c
 	${CMAKE_CURRENT_SOURCE_DIR}/src/xpdraw/windows.h
-	${CMAKE_CURRENT_SOURCE_DIR}/src/tools.c
-	${CMAKE_CURRENT_SOURCE_DIR}/src/xpdraw/tools.h
 	${CMAKE_CURRENT_SOURCE_DIR}/src/fonts.c
 	${CMAKE_CURRENT_SOURCE_DIR}/src/xpdraw/fonts.h
 )

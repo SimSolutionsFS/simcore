@@ -17,7 +17,6 @@
 #ifndef XPDRAW_FONTS_H
 #define XPDRAW_FONTS_H
 
-#include <limits.h>
 #include <ft2build.h>
 #include FT_FREETYPE_H
 
@@ -50,25 +49,11 @@ typedef struct {
  * @brief Load a new font
  *
  * @param font Pointer to the font we are loading
- * @param fmt File path to load from
+ * @param fmt Formatted string
  * @param size Size of font face to use
+ * @param ... Arguments for formatted string
  */
 void xpd_font_load(xpd_font_face_t *font, const char *fmt, int size, ...) __attribute__ ((format(printf, 2, 4)));
-
-/**
- *	@brief Load a new font, but combine root and filename to create the filepath
- *
- * @param font Pointer to the font face
- * @param root First half of filepath
- * @param filename Second half of filepath
- * @param size Size of the font face
- */
-[[deprecated]]
-inline void xpd_font_load2(xpd_font_face_t *font, const char *root, const char *filename, const int size) {
-	char *fnt_pth_tmp = xpd_tools_constr(root, filename);
-	xpd_font_load(font, fnt_pth_tmp, size);
-	free(fnt_pth_tmp);
-}
 
 /**
  * @brief Returns the length of a string.
@@ -77,7 +62,7 @@ inline void xpd_font_load2(xpd_font_face_t *font, const char *root, const char *
  * @param text Text to get the length of
  * @return int
  */
-int xpd_text_length(xpd_font_face_t *font, const char *text);
+int xpd_text_length(const xpd_font_face_t *font, const char *text);
 
 /**
  * @brief Function to draw text
@@ -89,7 +74,7 @@ int xpd_text_length(xpd_font_face_t *font, const char *text);
  * @param align Alignment of the text relative to x
  * @param color Color of the text; defaults to white
  */
-void xpd_text_draw(xpd_font_face_t *font, const char *text, int x, int y, xpd_text_align_t align,
+void xpd_text_draw(const xpd_font_face_t *font, const char *text, int x, int y, xpd_text_align_t align,
 				   xpd_color_t color);
 
 #ifdef __cplusplus
