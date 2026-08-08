@@ -1,5 +1,7 @@
 #include "simcore/draw_tools.h"
 
+#include <math.h>
+
 void sc_draw_triangle(float x, float y, float width, float height, uint32_t color) {
 	float x1, y1, x2, y2, x3, y3;
 
@@ -30,8 +32,21 @@ void sc_draw_triangle(float x, float y, float width, float height, uint32_t colo
 	XPLMPolygon(color, vlist, 3);
 }
 
-void sc_draw_circle(int left, int bottom, int r, uint32_t color) {
-	// TODO: Implement this.
+void sc_draw_circle(float left, float bottom, float r, uint32_t color) {
+	XPLMVertex_t array[36];
+
+	for (int i = 0; i < 36; i++) {
+		double ang = (i * 10) * (M_PI / 180);
+
+		XPLMVertex_t new = {
+			(float)(left + r + (cos(ang) * r)),
+			(float)(bottom + r + (sin(ang) * r))
+		};
+
+		array[i] = new;
+	}
+
+	XPLMPolygon(color, array, 36);
 }
 
 void sc_draw_rect(float left, float bottom, float width, float height, uint32_t color) {
