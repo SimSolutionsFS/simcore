@@ -49,10 +49,6 @@ static int sw_cb_l(XPLMCommandRef inCommand, XPLMCommandPhase inPhase, void *inR
 		all_sw[i].act_gain = -SWITCH_GAIN;
 		all_sw[i].state -= 1;
 	}
-	else if ((inPhase == xplm_CommandEnd) && (all_sw[i].spring)) {
-		all_sw[i].act_gain = SWITCH_GAIN;
-		all_sw[i].state = 0;
-	}
 
 	if (all_sw[i].dr_state_exists) {
 		dr_seti(&all_sw[i].dr_state, all_sw[i].state);
@@ -110,31 +106,31 @@ void sw_ref(void) {
 }
 
 // Callbacks to update the state of the switch. Used by X-Plane
-static int sw_get_state_int(void *inRefcon) {
-	return all_sw[(int)inRefcon].state;
+static int sw_get_state2(void *inRefcon) {
+	return sw_get_state((int)inRefcon);
 }
 
-static void sw_set_state_int(void *inRefcon, int in_num) {
-	all_sw[(int)inRefcon].state = in_num;
+static void sw_set_state2(void *inRefcon, int in_num) {
+	sw_set_state((int)inRefcon, in_num);
 }
 
-static float sw_get_anim_int(void *inRefcon) {
-	return all_sw[(int)inRefcon].anim_pos;
+static float sw_get_anim2(void *inRefcon) {
+	return sw_get_anim((int)inRefcon);
 }
 
 // Callbacks to update & get the state of the switch. Used instead of pointers to prevent issues
-int sw_get_state(switch_t inRefcon) {
-	return all_sw[inRefcon].state;
+int sw_get_state(const switch_t in_sw) {
+	return all_sw[in_sw].state;
 }
 
-float sw_get_anim(switch_t inRefcon) {
-	return all_sw[inRefcon].anim_pos;
+float sw_get_anim(const switch_t in_sw) {
+	return all_sw[in_sw].anim_pos;
 }
 
-void sw_set_state(switch_t inRefcon, int in_num) {
-	all_sw[inRefcon].state = in_num;
-	if (all_sw[inRefcon].dr_state_exists) {
-		dr_seti(&all_sw[inRefcon].dr_state, in_num);
+void sw_set_state(const switch_t in_sw, const int in_num) {
+	all_sw[in_sw].state = in_num;
+	if (all_sw[in_sw].dr_state_exists) {
+		dr_seti(&all_sw[in_sw].dr_state, in_num);
 	}
 }
 
@@ -199,8 +195,8 @@ switch_t sw_new(char *dr_name, const char *dr_anim_name, const char *cmd_name, c
 				dr_name,
 				xplmType_Int,
 				0,
-				sw_get_state_int,
-				sw_set_state_int,
+				sw_get_state2,
+				sw_set_state2,
 				NULL,
 				NULL,
 				NULL,
@@ -229,7 +225,7 @@ switch_t sw_new(char *dr_name, const char *dr_anim_name, const char *cmd_name, c
 			0,
 			NULL,
 			NULL,
-			sw_get_anim_int,
+			sw_get_anim2,
 			NULL,
 			NULL,
 			NULL,
@@ -292,8 +288,8 @@ switch_t sw_new2(char *dr_name, const char *dr_anim_name, const char *cmd_name_l
 				dr_name,
 				xplmType_Int,
 				0,
-				sw_get_state_int,
-				sw_set_state_int,
+				sw_get_state2,
+				sw_set_state2,
 				NULL,
 				NULL,
 				NULL,
@@ -322,7 +318,7 @@ switch_t sw_new2(char *dr_name, const char *dr_anim_name, const char *cmd_name_l
 			0,
 			NULL,
 			NULL,
-			sw_get_anim_int,
+			sw_get_anim2,
 			NULL,
 			NULL,
 			NULL,
