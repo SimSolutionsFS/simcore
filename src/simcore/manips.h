@@ -71,7 +71,7 @@ typedef int switch_t;
 switch_t sw_new(char *dr_name, const char *dr_anim_name, const char *cmd_name, const char *cmd_desc, int spring);
 
 /**
- * @brief Initialize a switch with multiple positions.
+ * @brief Initialize a dial switch.
  *
  * @param dr_name Name of the switches state dataref. This is for systems, and should not be used for animations.
  * @param dr_anim_name Name of the switch's animation dataref. This is for animations only, and should not be used for animations.
@@ -79,8 +79,8 @@ switch_t sw_new(char *dr_name, const char *dr_anim_name, const char *cmd_name, c
  * @param cmd_desc_l Description to show up in the X-Plane UI.
  * @param cmd_name_r Name of the switch's toggle command. This should be used in click spots.
  * @param cmd_desc_r Description to show up in the X-Plane UI.
- * @param min_range Minimum value the switch can be.
- * @param max_range Maximum value the switch can be.
+ * @param min_range Minimum value the switch can be set to.
+ * @param max_range Maximum value the switch can be set to.
  * @param default_value Default value of the switch.
  * @param spring If true, the last position will be spring-loaded.
  *

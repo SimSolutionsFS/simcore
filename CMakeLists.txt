@@ -29,10 +29,10 @@ add_library(simcore
 	${CMAKE_CURRENT_SOURCE_DIR}/src/simcore/manips.h
 	${CMAKE_CURRENT_SOURCE_DIR}/src/persist.c
 	${CMAKE_CURRENT_SOURCE_DIR}/src/simcore/persist.h
-	${CMAKE_CURRENT_SOURCE_DIR}/src/draw_tools.c
-	${CMAKE_CURRENT_SOURCE_DIR}/src/simcore/draw_tools.h
 	${CMAKE_CURRENT_SOURCE_DIR}/src/tools.c
 	${CMAKE_CURRENT_SOURCE_DIR}/src/simcore/tools.h
+	${CMAKE_CURRENT_SOURCE_DIR}/src/draw_tools.c
+	${CMAKE_CURRENT_SOURCE_DIR}/src/simcore/draw_tools.h
 
 	${CMAKE_CURRENT_SOURCE_DIR}/src/xpdraw.c
 	${CMAKE_CURRENT_SOURCE_DIR}/src/xpdraw/xpdraw.h
