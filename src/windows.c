@@ -79,7 +79,7 @@ void xpd_win_create2(xpd_win_t *inWindow, const char *title, int winLeft, int wi
 	inWindow->params.top = inWindow->params.bottom + inWindow->height - 20;
 
 #ifdef XPLM440
-	inWindow->params.windowContentType = xplm_WindowContentTypePanelGraphics;
+	inWindow->params.contentType = xplm_WindowContentTypePanelGraphics;
 #endif
 
 	inWindow->windowID = XPLMCreateWindowEx(&inWindow->params);
