@@ -45,8 +45,6 @@ target_include_directories(simcore
 	${CMAKE_CURRENT_SOURCE_DIR}/deps/XPSDK/CHeaders/XPLM
 	${CMAKE_CURRENT_SOURCE_DIR}/deps/XPSDK/CHeaders/Widgets
 	${CMAKE_CURRENT_SOURCE_DIR}/deps/libacfutils-redist/include
-
-	PRIVATE
 	${CMAKE_CURRENT_SOURCE_DIR}/deps/stb
 )
 
