@@ -16,7 +16,7 @@ static int all_sw_size = 0;
 static int sw_basic_cb(XPLMCommandRef inCommand, XPLMCommandPhase inPhase, void *inRefcon) {
 	UNUSED(inCommand);
 
-	int i = (int)inRefcon;
+	const int i = (int)inRefcon;
 
 	if (inPhase == xplm_CommandBegin) {
 		if (all_sw[i].state == 0) {
@@ -28,7 +28,7 @@ static int sw_basic_cb(XPLMCommandRef inCommand, XPLMCommandPhase inPhase, void 
 
 		all_sw[i].state = !all_sw[i].state;
 	}
-	else if ((all_sw[i].spring) && (inPhase == xplm_CommandEnd)) {
+	else if ((all_sw[i].spring != SW_NO_SPRING) && (inPhase == xplm_CommandEnd)) {
 		all_sw[i].act_gain = -SWITCH_GAIN;
 		all_sw[i].state = 0;
 	}
@@ -43,11 +43,15 @@ static int sw_basic_cb(XPLMCommandRef inCommand, XPLMCommandPhase inPhase, void 
 static int sw_cb_l(XPLMCommandRef inCommand, XPLMCommandPhase inPhase, void *inRefcon) {
 	UNUSED(inCommand);
 
-	int i = (int)inRefcon;
+	const int i = (int)inRefcon;
 
 	if ((inPhase == xplm_CommandBegin) && (all_sw[i].state > all_sw[i].min)) {
 		all_sw[i].act_gain = -SWITCH_GAIN;
 		all_sw[i].state -= 1;
+	}
+	else if ((inPhase == xplm_CommandEnd) && (all_sw[i].spring == SW_MOMENTARY)) {
+		all_sw[i].act_gain = SWITCH_GAIN;
+		all_sw[i].state += 1;
 	}
 
 	if (all_sw[i].dr_state_exists) {
@@ -60,15 +64,18 @@ static int sw_cb_l(XPLMCommandRef inCommand, XPLMCommandPhase inPhase, void *inR
 static int sw_cb_r(XPLMCommandRef inCommand, XPLMCommandPhase inPhase, void *inRefcon) {
 	UNUSED(inCommand);
 
-	int i = (int)inRefcon;
+	const int i = (int)inRefcon;
 
 	if ((inPhase == xplm_CommandBegin) && (all_sw[i].state < all_sw[i].max)) {
 		all_sw[i].act_gain = SWITCH_GAIN;
 		all_sw[i].state += 1;
 	}
-	else if ((inPhase == xplm_CommandEnd) && (all_sw[i].spring) && (all_sw[i].state == all_sw[i].max)) {
-		all_sw[i].act_gain = -SWITCH_GAIN;
-		all_sw[i].state -= 1;
+	else if ((inPhase == xplm_CommandEnd) && (all_sw[i].spring != SW_NO_SPRING)) {
+		if (((all_sw[i].spring == SW_SPRING_LAST_POS_ONLY) && (all_sw[i].state == all_sw[i].max)) || (
+				all_sw[i].spring == SW_MOMENTARY)) {
+			all_sw[i].act_gain = -SWITCH_GAIN;
+			all_sw[i].state -= 1;
+		}
 	}
 
 	if (all_sw[i].dr_state_exists) {
@@ -165,7 +172,8 @@ static sw_t *sw_create_blank(void) {
 	return &all_sw[idx];
 }
 
-switch_t sw_new(char *dr_name, const char *dr_anim_name, const char *cmd_name, const char *cmd_desc, const int spring) {
+switch_t sw_new(char *dr_name, const char *dr_anim_name, const char *cmd_name, const char *cmd_desc,
+				const sw_spring_type_t spring) {
 	// Initialize the switch
 	sw_t *sw = sw_create_blank();
 	sw->type = SW_BASIC;
@@ -189,7 +197,7 @@ switch_t sw_new(char *dr_name, const char *dr_anim_name, const char *cmd_name, c
 
 	// Register datarefs
 	if (dr_name != NULL) {
-		unsigned int result = dr_find(&sw->dr_state, "%s", dr_name);
+		const unsigned int result = dr_find(&sw->dr_state, "%s", dr_name);
 		if (result == 0) {
 			XPLMRegisterDataAccessor(
 				dr_name,
@@ -245,7 +253,7 @@ switch_t sw_new(char *dr_name, const char *dr_anim_name, const char *cmd_name, c
 
 switch_t sw_new2(char *dr_name, const char *dr_anim_name, const char *cmd_name_l, const char *cmd_desc_l,
 				 const char *cmd_name_r, const char *cmd_desc_r, const int min_range, const int max_range,
-				 const int default_value, const int spring) {
+				 const int default_value, const sw_spring_type_t spring) {
 	// Initialize the switch
 	sw_t *sw = sw_create_blank();
 	sw->type = SW_MULTI;
@@ -282,7 +290,7 @@ switch_t sw_new2(char *dr_name, const char *dr_anim_name, const char *cmd_name_l
 
 	// Register datarefs
 	if (dr_name != NULL) {
-		unsigned int result = dr_find(&sw->dr_state, "%s", dr_name);
+		const unsigned int result = dr_find(&sw->dr_state, "%s", dr_name);
 		if (result == 0) {
 			XPLMRegisterDataAccessor(
 				dr_name,

@@ -24,7 +24,20 @@
 extern "C" {
 #endif
 
+/// Defines the type of switch - for internal use. Do not use this. Do not use this. Do not use this. Do not use this!!
 typedef enum { SW_BASIC, SW_MULTI } sw_type_t;
+
+/// Determines if the switch is spring-loaded to return to a certain position
+typedef enum {
+	/// A regular switch.
+	SW_NO_SPRING,
+
+	/// The switch only snaps back to it's last position at the very high end of it's range, like the starter at the back of an ignition key
+	SW_SPRING_LAST_POS_ONLY,
+
+	/// The switch always returns to the neutral (0) position when it is released.
+	SW_MOMENTARY
+} sw_spring_type_t;
 
 struct {
 	// Internal
@@ -34,7 +47,7 @@ struct {
 
 	// Data for basic switches
 	int state;
-	int spring;
+	sw_spring_type_t spring;
 	float act_gain;
 	float anim_pos;
 	dr_t dr_state;
@@ -64,11 +77,12 @@ typedef int switch_t;
  * @param dr_anim_name Name of the switch's animation dataref. This is for animations only, and should not be used for animations.
  * @param cmd_name Name of the switch's toggle command. This should be used in click spots.
  * @param cmd_desc Description to show up in the X-Plane UI.
- * @param spring Does the switch return to 0 once released?
+ * @param spring Which positions are spring loaded? (see sw_spring_type_t for more)
  *
  * @return An ID for the switch.
  */
-switch_t sw_new(char *dr_name, const char *dr_anim_name, const char *cmd_name, const char *cmd_desc, int spring);
+switch_t sw_new(char *dr_name, const char *dr_anim_name, const char *cmd_name, const char *cmd_desc,
+				sw_spring_type_t spring);
 
 /**
  * @brief Initialize a dial switch.
@@ -82,13 +96,13 @@ switch_t sw_new(char *dr_name, const char *dr_anim_name, const char *cmd_name, c
  * @param min_range Minimum value the switch can be set to.
  * @param max_range Maximum value the switch can be set to.
  * @param default_value Default value of the switch.
- * @param spring If true, the last position will be spring-loaded.
+ * @param spring Which positions are spring loaded? (see sw_spring_type_t for more)
  *
  * @return An ID for the switch.
  */
 switch_t sw_new2(char *dr_name, const char *dr_anim_name, const char *cmd_name_l, const char *cmd_desc_l,
 				 const char *cmd_name_r, const char *cmd_desc_r, int min_range, int max_range, int default_value,
-				 int spring);
+				 sw_spring_type_t spring);
 
 /**
  * @brief Refreshes all registered switches.
