@@ -10,11 +10,9 @@
 #include <acfutils/dr.h>
 #include <acfutils/geom.h>
 #include <acfutils/perf.h>
+#include <simcore/draw_tools.h>
 #include <simcore/manips.h>
-#include <simcore/tools.h>
-#include <xpdraw/fonts.h>
 #include <xpdraw/windows.h>
-#include <xpdraw/xpdraw.h>
 
 #ifdef WIN32
 #include <io.h>
@@ -65,14 +63,17 @@ static float eng_thro;
 #define WIN_H 250
 #define WIN_W 600
 
-#define WIN_CLR_H (xpd_color_t){ 0.35, 0.35, 0.35, 1 }
-#define WIN_CLR_BUT_PRI (xpd_color_t){ 0.23, 0.49, 0.65, 1 }
-#define WIN_CLR_BUT_SEC WIN_CLR_H
+static uint32_t SC_COLOR_PRI;
+static uint32_t SC_COLOR_SEC;
+static uint32_t SC_COLOR_WHITE;
+static uint32_t SC_COLOR_BLACK;
 
 static xpd_win_t pmpt_win;
 
-static xpd_font_face_t win_header_font;
-static xpd_font_face_t win_text_font;
+static XPLMFontHandle win_header_font;
+static XPLMFontHandle win_text_font;
+
+static char win_vrb_text[512];
 
 // Flight loop that constantly loads the state of the aircraft (every UPDATE_RATE_SEC) and updates its status in the file.
 static float persist_fl_ref(float elapsedMe, float elapsedSim, int counter, void *refcon) {
@@ -154,30 +155,28 @@ static XPLMFlightLoopID kill_fl;
 static void pmpt_win_render(XPLMWindowID in_window_id, void *inRefcon) {
 	UNUSED(inRefcon);
 
-	char win_vrb_text[512];
-
-	XPLMBindTexture2d(pmpt_win.texNum, 0);
-	glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, WIN_H, WIN_W, GL_RGBA, GL_UNSIGNED_BYTE, pmpt_win.buffer);
-	XPLMSetGraphicsState(0, 0, 0, 0, 1, 1, 0);
 	int windowLeft, windowBottom;
 	XPLMGetWindowGeometry(in_window_id, &windowLeft, NULL, NULL, &windowBottom);
 
-	xpd_set_anchor(windowLeft - 10, windowBottom - 10);
+	const float base_x = (float)windowLeft - 10;
+	const float base_y = (float)windowBottom - 10;
 
-	xpd_draw_rect(0, 0, 600, 250, XPD_COLOR_BLACK);
-	xpd_draw_rect(0, 200, 600, 50, WIN_CLR_H);
-	xpd_text_draw(&win_header_font, "Restore your last state?", 10, 214, XPD_ALIGN_L, XPD_COLOR_WHITE);
+	sc_draw_rect(base_x, base_y, 600, 250, SC_COLOR_BLACK);
+	sc_draw_rect(base_x, base_y + 200, 600, 50, SC_COLOR_SEC);
+	XPLMFontDrawString(win_header_font, SC_COLOR_WHITE, 39, base_x + 10, base_y + 214, "Restore your last state?",
+					   xplm_JustLeft);
 
 	sprintf(win_vrb_text, "You are %.2f nm from your last session.", dist_to_save);
-	xpd_text_draw(&win_text_font, win_vrb_text, 15, 165, XPD_ALIGN_L, XPD_COLOR_WHITE);
-	xpd_text_draw(&win_text_font, "Would you like to restore your position and", 15, 115, XPD_ALIGN_L, XPD_COLOR_WHITE);
-	xpd_text_draw(&win_text_font, "general state?", 15, 85, XPD_ALIGN_L, XPD_COLOR_WHITE);
+	XPLMFontDrawString(win_text_font, SC_COLOR_WHITE, 27, base_x + 15, base_y + 165, win_vrb_text, xplm_JustLeft);
+	XPLMFontDrawString(win_text_font, SC_COLOR_WHITE, 27, base_x + 15, base_y + 115,
+					   "Would you like to restore your position and", xplm_JustLeft);
+	XPLMFontDrawString(win_text_font, SC_COLOR_WHITE, 27, base_x + 15, base_y + 85, "general state?", xplm_JustLeft);
 
-	xpd_draw_rect(20, 20, 130, 35, WIN_CLR_BUT_PRI);
-	xpd_text_draw(&win_text_font, "Yes", 85, 28, XPD_ALIGN_C, XPD_COLOR_WHITE);
+	sc_draw_rect(base_x + 20, base_y + 20, 130, 35, SC_COLOR_PRI);
+	XPLMFontDrawString(win_text_font, SC_COLOR_WHITE, 27, base_x + 85, base_y + 28, "Yes", xplm_JustCenter);
 
-	xpd_draw_rect(170, 20, 130, 35, WIN_CLR_BUT_SEC);
-	xpd_text_draw(&win_text_font, "No", 235, 28, XPD_ALIGN_C, XPD_COLOR_WHITE);
+	sc_draw_rect(base_x + 170, base_y + 20, 130, 35, SC_COLOR_SEC);
+	XPLMFontDrawString(win_text_font, SC_COLOR_WHITE, 27, base_x + 235, base_y + 28, "No", xplm_JustCenter);
 }
 
 static int pmpt_win_cb(XPLMWindowID inWindowID, int x, int y, XPLMMouseStatus inMouse, void *inRefcon) {
@@ -263,9 +262,17 @@ void persist_init(const char *in_folder_pth) {
 	snprintf(persist_fp, sizeof(char) * 512, "%s%s", prefs_fp, in_folder_pth);
 	free(prefs_fp);
 
+	// Load colors
+	SC_COLOR_PRI = XPLMMakeColor(0.23f, 0.49f, 0.65f, 1);
+	SC_COLOR_SEC = XPLMMakeColor(0.35f, 0.35f, 0.35f, 1);
+	SC_COLOR_WHITE = XPLMMakeColor(1, 1, 1, 1);
+	SC_COLOR_BLACK = XPLMMakeColor(0, 0, 0, 1);
+
 	// Load fonts
-	xpd_font_load(&win_header_font, "%s/Resources/fonts/Roboto-Bold.ttf", 26, tools_xp_fp());
-	xpd_font_load(&win_text_font, "%s/Resources/fonts/Roboto-Regular.ttf", 18, tools_xp_fp());
+	win_header_font = XPLMCreateFont(xplm_CharSetUnicode);
+	XPLMFontAddFace(win_header_font, "Resources/fonts/Roboto-Bold.ttf");
+	win_text_font = XPLMCreateFont(xplm_CharSetUnicode);
+	XPLMFontAddFace(win_text_font, "Resources/fonts/Roboto-Regular.ttf");
 }
 
 // Runs when we should start the persistance system

@@ -114,7 +114,7 @@ void xpd_win_set_wheel_cb(xpd_win_t *inWindow, XPLMHandleMouseWheel_f new_cb);
 void xpd_win_set_key_cb(xpd_win_t *inWindow, XPLMHandleKey_f new_cb);
 
 /**
- * @brief Display a window created with xpd_win_new
+ * @brief Display a window created with xpd_win_new. If XPLM440 is available, panel graphics *must* be used.
  *
  * @param inWindow Window to start rendering
  * @param title Title of the window
@@ -122,7 +122,7 @@ void xpd_win_set_key_cb(xpd_win_t *inWindow, XPLMHandleKey_f new_cb);
 void xpd_win_create(xpd_win_t *inWindow, const char *title);
 
 /**
- * @brief Display a window created with xpd_win_new
+ * @brief Display a window created with xpd_win_new. If XPLM440 is available, panel graphics *must* be used.
  *
  * @param inWindow Window to start rendering
  * @param title Title of the window
