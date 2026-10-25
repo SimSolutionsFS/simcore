@@ -12,7 +12,7 @@
 #include <acfutils/perf.h>
 #include <simcore/draw_tools.h>
 #include <simcore/manips.h>
-#include <xpdraw/windows.h>
+#include <simcore/win.h>
 
 #ifdef WIN32
 #include <io.h>
@@ -68,7 +68,7 @@ static uint32_t SC_COLOR_SEC;
 static uint32_t SC_COLOR_WHITE;
 static uint32_t SC_COLOR_BLACK;
 
-static xpd_win_t pmpt_win;
+static sc_win_t pmpt_win;
 
 static XPLMFontHandle win_header_font;
 static XPLMFontHandle win_text_font;
@@ -220,7 +220,7 @@ static float the_kill_fl_ref(float elapsedMe, float elapsedSim, int counter, voi
 	UNUSED(refcon);
 
 	if (kill_win == 1) {
-		XPLMDestroyWindow(pmpt_win.windowID);
+		XPLMDestroyWindow(pmpt_win.id);
 		XPLMDestroyFlightLoop(kill_fl);
 		kill_win = 0;
 	}
@@ -240,16 +240,11 @@ static void pmpt_win_create(void) {
 	kill_fl = XPLMCreateFlightLoop(&persistenceFLParams);
 	XPLMScheduleFlightLoop(kill_fl, -1, 1);
 
-	// Create window object
-	xpd_win_new(&pmpt_win, WIN_W, WIN_H);
-
-	// Load callbacks
-	xpd_win_set_draw_cb(&pmpt_win, pmpt_win_render);
-	xpd_win_set_click_cb(&pmpt_win, pmpt_win_cb);
-
-	// Display window
-	xpd_win_create(&pmpt_win, "Restore Save?");
-	xpd_win_resize_lims(&pmpt_win, WIN_W, WIN_H, WIN_W, WIN_H);
+	// Create & display window
+	sc_win_new(&pmpt_win, WIN_W, WIN_H);
+	sc_win_set_cb(&pmpt_win, pmpt_win_render, pmpt_win_cb, NULL, NULL, NULL);
+	sc_win_create(&pmpt_win, "Restore Save?");
+	sc_win_set_size(&pmpt_win, WIN_W, WIN_H, WIN_W, WIN_H);
 }
 
 void persist_init(const char *in_folder_pth) {

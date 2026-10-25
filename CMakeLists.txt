@@ -33,6 +33,8 @@ add_library(simcore
 	${CMAKE_CURRENT_SOURCE_DIR}/src/simcore/tools.h
 	${CMAKE_CURRENT_SOURCE_DIR}/src/draw_tools.c
 	${CMAKE_CURRENT_SOURCE_DIR}/src/simcore/draw_tools.h
+	${CMAKE_CURRENT_SOURCE_DIR}/src/win.c
+	${CMAKE_CURRENT_SOURCE_DIR}/src/simcore/win.h
 
 	${CMAKE_CURRENT_SOURCE_DIR}/src/xpdraw.c
 	${CMAKE_CURRENT_SOURCE_DIR}/src/xpdraw/xpdraw.h
