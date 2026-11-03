@@ -77,7 +77,6 @@ void xpd_win_create2(xpd_win_t *inWindow, const char *title, int winLeft, int wi
 	inWindow->params.bottom = bottom + winDown;
 	inWindow->params.right = inWindow->params.left + inWindow->width - 20;
 	inWindow->params.top = inWindow->params.bottom + inWindow->height - 20;
-
 	inWindow->windowID = XPLMCreateWindowEx(&inWindow->params);
 
 	XPLMSetWindowPositioningMode(inWindow->windowID, xplm_WindowPositionFree, -1);
