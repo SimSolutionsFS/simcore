@@ -71,7 +71,11 @@ void base_key(XPLMWindowID in_window_id, char key, XPLMKeyFlags flags, char virt
  * @param width Width of the window's framebuffer
  * @param height Height of the window's framebuffer
  */
-void xpd_win_new(xpd_win_t *inWindow, int width, int height);
+void xpd_win_new(xpd_win_t *inWindow, int width, int height)
+#ifdef __GNUC__
+__attribute__((deprecated))
+#endif
+;
 
 /**
  * @brief Register a callback to render the window
@@ -79,7 +83,11 @@ void xpd_win_new(xpd_win_t *inWindow, int width, int height);
  * @param inWindow Window to update
  * @param new_cb New callback
  */
-void xpd_win_set_draw_cb(xpd_win_t *inWindow, XPLMDrawWindow_f new_cb);
+void xpd_win_set_draw_cb(xpd_win_t *inWindow, XPLMDrawWindow_f new_cb)
+#ifdef __GNUC__
+__attribute__((deprecated))
+#endif
+;
 
 /**
  * @brief Register a callback to handle clicks in the window
@@ -87,7 +95,11 @@ void xpd_win_set_draw_cb(xpd_win_t *inWindow, XPLMDrawWindow_f new_cb);
  * @param inWindow Window to update
  * @param new_cb New callback
  */
-void xpd_win_set_click_cb(xpd_win_t *inWindow, XPLMHandleMouseClick_f new_cb);
+void xpd_win_set_click_cb(xpd_win_t *inWindow, XPLMHandleMouseClick_f new_cb)
+#ifdef __GNUC__
+__attribute__((deprecated))
+#endif
+;
 
 /**
  * @brief Register a callback to handle the cursor style (how it looks on the screen)
@@ -95,7 +107,11 @@ void xpd_win_set_click_cb(xpd_win_t *inWindow, XPLMHandleMouseClick_f new_cb);
  * @param inWindow Window to update
  * @param new_cb New callback
  */
-void xpd_win_set_cursor_cb(xpd_win_t *inWindow, XPLMHandleCursor_f new_cb);
+void xpd_win_set_cursor_cb(xpd_win_t *inWindow, XPLMHandleCursor_f new_cb)
+#ifdef __GNUC__
+__attribute__((deprecated))
+#endif
+;
 
 /**
  * @brief Register a callback to handle scrolling in a window
@@ -103,7 +119,11 @@ void xpd_win_set_cursor_cb(xpd_win_t *inWindow, XPLMHandleCursor_f new_cb);
  * @param inWindow Window to update
  * @param new_cb New callback
  */
-void xpd_win_set_wheel_cb(xpd_win_t *inWindow, XPLMHandleMouseWheel_f new_cb);
+void xpd_win_set_wheel_cb(xpd_win_t *inWindow, XPLMHandleMouseWheel_f new_cb)
+#ifdef __GNUC__
+__attribute__((deprecated))
+#endif
+;
 
 /**
  * @brief Register a callback to handle keyboard presses in a window
@@ -111,7 +131,11 @@ void xpd_win_set_wheel_cb(xpd_win_t *inWindow, XPLMHandleMouseWheel_f new_cb);
  * @param inWindow
  * @param new_cb
  */
-void xpd_win_set_key_cb(xpd_win_t *inWindow, XPLMHandleKey_f new_cb);
+void xpd_win_set_key_cb(xpd_win_t *inWindow, XPLMHandleKey_f new_cb)
+#ifdef __GNUC__
+__attribute__((deprecated))
+#endif
+;
 
 /**
  * @brief Display a window created with xpd_win_new.
@@ -119,7 +143,11 @@ void xpd_win_set_key_cb(xpd_win_t *inWindow, XPLMHandleKey_f new_cb);
  * @param inWindow Window to start rendering
  * @param title Title of the window
  */
-void xpd_win_create(xpd_win_t *inWindow, const char *title);
+void xpd_win_create(xpd_win_t *inWindow, const char *title)
+#ifdef __GNUC__
+__attribute__((deprecated))
+#endif
+;
 
 /**
  * @brief Display a window created with xpd_win_new.
@@ -129,7 +157,11 @@ void xpd_win_create(xpd_win_t *inWindow, const char *title);
  * @param winLeft Position of the left edge of the window
  * @param winDown Position of the bottom edge of the window
  */
-void xpd_win_create2(xpd_win_t *inWindow, const char *title, int winLeft, int winDown);
+void xpd_win_create2(xpd_win_t *inWindow, const char *title, int winLeft, int winDown)
+#ifdef __GNUC__
+__attribute__((deprecated))
+#endif
+;
 
 /**
  * @brief Set the minimum & maximum sizes of a window
@@ -140,7 +172,11 @@ void xpd_win_create2(xpd_win_t *inWindow, const char *title, int winLeft, int wi
  * @param maxWidth New maximum width of the window
  * @param maxHeight New maximum height of the window
  */
-void xpd_win_resize_lims(const xpd_win_t *inWindow, int minWidth, int minHeight, int maxWidth, int maxHeight);
+void xpd_win_resize_lims(const xpd_win_t *inWindow, int minWidth, int minHeight, int maxWidth, int maxHeight)
+#ifdef __GNUC__
+__attribute__((deprecated))
+#endif
+;
 
 #ifdef __cplusplus
 }

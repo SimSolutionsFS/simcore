@@ -13,7 +13,7 @@ The project currently consists of the following:
   * [persist.h](src/simcore/persist.h), a continuation of the persistence system first introduced in the DA40.
   * [tools.h](src/simcore/tools.h), misc helper functions
   * [win.h](src/simcore/win.h), support for X-Plane window creation using the panel graphics API for rendering
-* `xpdraw/` [DEPRECIATED]
+* `xpdraw/` [DEPRECATED]
   * [xpdraw.h](src/xpdraw/xpdraw.h), simplified OpenGL functions
   * [fonts.h](src/xpdraw/fonts.h), support for text rendering in xpdraw
   * [windows.h](src/xpdraw/windows.h), support for X-Plane window creation in xpdraw

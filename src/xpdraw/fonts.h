@@ -53,7 +53,11 @@ typedef struct {
  * @param size Size of font face to use
  * @param ... Arguments for formatted string
  */
-void xpd_font_load(xpd_font_face_t *font, const char *fmt, int size, ...) __attribute__ ((format(printf, 2, 4)));
+void xpd_font_load(xpd_font_face_t *font, const char *fmt, int size, ...) __attribute__ ((format(printf, 2, 4)))
+#ifdef __GNUC__
+__attribute__((deprecated))
+#endif
+;
 
 /**
  * @brief Returns the length of a string.
@@ -62,7 +66,11 @@ void xpd_font_load(xpd_font_face_t *font, const char *fmt, int size, ...) __attr
  * @param text Text to get the length of
  * @return int
  */
-int xpd_text_length(const xpd_font_face_t *font, const char *text);
+int xpd_text_length(const xpd_font_face_t *font, const char *text)
+#ifdef __GNUC__
+__attribute__((deprecated))
+#endif
+;
 
 /**
  * @brief Function to draw text
@@ -75,7 +83,11 @@ int xpd_text_length(const xpd_font_face_t *font, const char *text);
  * @param color Color of the text; defaults to white
  */
 void xpd_text_draw(const xpd_font_face_t *font, const char *text, int x, int y, xpd_text_align_t align,
-				   xpd_color_t color);
+				   xpd_color_t color)
+#ifdef __GNUC__
+__attribute__((deprecated))
+#endif
+;
 
 #ifdef __cplusplus
 }

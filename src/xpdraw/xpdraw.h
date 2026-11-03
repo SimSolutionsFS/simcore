@@ -64,7 +64,11 @@ static const xpd_texture_t xpd_texture_empty = {
  * @param height Height of buffer
  * @param format Format of buffer
  */
-void xpd_load_buffer(xpd_texture_t *texture, const void *buffer, unsigned int width, unsigned int height, GLint format);
+void xpd_load_buffer(xpd_texture_t *texture, const void *buffer, unsigned int width, unsigned int height, GLint format)
+#ifdef __GNUC__
+__attribute__((deprecated))
+#endif
+;
 
 /**
  * @brief Sets the position of the 'anchor'. All future calls will be relative to this location if defined.
@@ -72,7 +76,11 @@ void xpd_load_buffer(xpd_texture_t *texture, const void *buffer, unsigned int wi
  * @param newAnchor_x Lateral position of the anchor
  * @param newAnchor_y Vertical position of the anchor
  */
-void xpd_set_anchor(int newAnchor_x, int newAnchor_y);
+void xpd_set_anchor(int newAnchor_x, int newAnchor_y)
+#ifdef __GNUC__
+__attribute__((deprecated))
+#endif
+;
 
 /**
  * @brief Draw a triangle with the specified points
@@ -83,7 +91,11 @@ void xpd_set_anchor(int newAnchor_x, int newAnchor_y);
  * @param height Height of the triangle
  * @param color Color of the triangle
  */
-void xpd_draw_triangle(int x, int y, int width, int height, xpd_color_t color);
+void xpd_draw_triangle(int x, int y, int width, int height, xpd_color_t color)
+#ifdef __GNUC__
+__attribute__((deprecated))
+#endif
+;
 
 /**
  * @brief Draw a rectangle with the specified parameters
@@ -94,7 +106,11 @@ void xpd_draw_triangle(int x, int y, int width, int height, xpd_color_t color);
  * @param height Height of the rectangle
  * @param color Color of the rectangle
  */
-void xpd_draw_rect(int left, int bottom, int width, int height, xpd_color_t color);
+void xpd_draw_rect(int left, int bottom, int width, int height, xpd_color_t color)
+#ifdef __GNUC__
+__attribute__((deprecated))
+#endif
+;
 
 /**
  * @brief Draw a rectangle with the specified parameters
@@ -108,7 +124,11 @@ void xpd_draw_rect(int left, int bottom, int width, int height, xpd_color_t colo
  * @param borderColor Color of the rectangle border (if shown)
  */
 void xpd_draw_rect2(int left, int bottom, int width, int height, xpd_color_t color, int borderSize,
-					xpd_color_t borderColor);
+					xpd_color_t borderColor)
+#ifdef __GNUC__
+__attribute__((deprecated))
+#endif
+;
 
 /**
  * @brief Draw a quad with the specified points
@@ -123,7 +143,11 @@ void xpd_draw_rect2(int left, int bottom, int width, int height, xpd_color_t col
  * @param y4 Vertical position of the fourth point
  * @param color Color of the quad
  */
-void xpd_draw_quad(int x1, int y1, int x2, int y2, int x3, int y3, int x4, int y4, xpd_color_t color);
+void xpd_draw_quad(int x1, int y1, int x2, int y2, int x3, int y3, int x4, int y4, xpd_color_t color)
+#ifdef __GNUC__
+__attribute__((deprecated))
+#endif
+;
 
 /**
  * @brief Draw a line
@@ -135,7 +159,11 @@ void xpd_draw_quad(int x1, int y1, int x2, int y2, int x3, int y3, int x4, int y
  * @param color Color of the line
  * @param thickness Thickness of the line
  */
-void xpd_draw_line(int start_x, int start_y, int end_x, int end_y, xpd_color_t color, float thickness);
+void xpd_draw_line(int start_x, int start_y, int end_x, int end_y, xpd_color_t color, float thickness)
+#ifdef __GNUC__
+__attribute__((deprecated))
+#endif
+;
 
 /**
  * @brief Draw a mirrored version of a texture; used by fonts
@@ -149,7 +177,11 @@ void xpd_draw_line(int start_x, int start_y, int end_x, int end_y, xpd_color_t c
  * @param flipped Flips the texture vertically, if true
  */
 void xpd_draw_texture2(const xpd_texture_t *texture, int left, int bottom, int width, int height, xpd_color_t color,
-					   int flipped);
+					   int flipped)
+#ifdef __GNUC__
+__attribute__((deprecated))
+#endif
+;
 
 /**
  * @brief Draw a mirrored version of a texture; used by fonts
@@ -161,7 +193,11 @@ void xpd_draw_texture2(const xpd_texture_t *texture, int left, int bottom, int w
  * @param height Height of the drawn texture; set to 0 to use the texture's height
  * @param color Color of the texture; defaults to white
  */
-void xpd_draw_texture(const xpd_texture_t *texture, int left, int bottom, int width, int height, xpd_color_t color);
+void xpd_draw_texture(const xpd_texture_t *texture, int left, int bottom, int width, int height, xpd_color_t color)
+#ifdef __GNUC__
+__attribute__((deprecated))
+#endif
+;
 
 /**
  * @brief Draw a rotated texture
@@ -178,7 +214,11 @@ void xpd_draw_texture(const xpd_texture_t *texture, int left, int bottom, int wi
  */
 void xpd_draw_rotated_texture(const xpd_texture_t *texture, double angle, int left, int bottom, int width, int height,
 							  int rx,
-							  int ry, xpd_color_t color);
+							  int ry, xpd_color_t color)
+#ifdef __GNUC__
+__attribute__((deprecated))
+#endif
+;
 
 /**
  * @brief Load a texture
@@ -187,7 +227,11 @@ void xpd_draw_rotated_texture(const xpd_texture_t *texture, double angle, int le
  * @param fmt Formatted string
  * @param ... Arguments to fmt
  */
-void xpd_load_texture(xpd_texture_t *texture, const char *fmt, ...) __attribute__ ((format(printf, 2, 3)));
+void xpd_load_texture(xpd_texture_t *texture, const char *fmt, ...) __attribute__ ((format(printf, 2, 3)))
+#ifdef __GNUC__
+__attribute__((deprecated))
+#endif
+;
 
 #ifdef __cplusplus
 }
