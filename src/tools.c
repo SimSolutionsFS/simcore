@@ -14,7 +14,7 @@ char *tools_plugin_fp(void) {
 
 	if (strlen(plugin_path) == 0) {
 		XPLMGetPluginInfo(XPLMGetMyID(), NULL, plugin_path, NULL, NULL);
-		strcpy(plugin_path, dirname(dirname(plugin_path))); // the double "dirname" here is intentional
+		strncpy(plugin_path, dirname(dirname(plugin_path)), sizeof(plugin_path)); // the double "dirname" here is intentional
 		strncat(plugin_path, "/", sizeof(plugin_path) - strlen(plugin_path) - 1);
 	}
 

@@ -172,8 +172,8 @@ void xpd_load_texture(xpd_texture_t *texture, const char *fmt, ...) {
 	va_list args;
 	va_start(args, fmt);
 
-	char *filename = malloc(sizeof(char) * 256);
-	vsnprintf(filename, 256, fmt, args);
+	char filename[256];
+	vsnprintf(filename, sizeof(filename), fmt, args);
 	va_end(args);
 
 	// Get a buffer from the passed file
@@ -185,6 +185,4 @@ void xpd_load_texture(xpd_texture_t *texture, const char *fmt, ...) {
 
 	xpd_load_buffer(texture, texDat, width, height, GL_RGBA);
 	stbi_image_free(texDat);
-
-	free(filename);
 }

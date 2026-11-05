@@ -22,7 +22,7 @@ static void base_key(XPLMWindowID in_window_id, char key, XPLMKeyFlags flags, ch
 					 int losing_focus) {}
 
 // Real functions
-void sc_win_new(sc_win_t *in_win, int width, int height) {
+void sc_win_new(sc_win_t *in_win, const int width, const int height) {
 	in_win->width = width;
 	in_win->height = height;
 	in_win->buffer = malloc(width * height * 4 * sizeof(unsigned char));
@@ -79,26 +79,29 @@ void sc_win_create(sc_win_t *in_win, const char *title) {
 }
 
 void sc_win_create2(sc_win_t *in_win, const char *title, const int win_left, const int win_down) {
-	in_win->params.structSize = sizeof(in_win->params);
-	in_win->params.visible = 1;
-	in_win->params.drawWindowFunc = in_win->draw_func;
-	in_win->params.handleMouseClickFunc = in_win->click_func;
-	in_win->params.handleRightClickFunc = in_win->click_func;
-	in_win->params.handleMouseWheelFunc = in_win->wheel_func;
-	in_win->params.handleKeyFunc = in_win->key_func;
-	in_win->params.handleCursorFunc = in_win->cursor_func;
-	in_win->params.refcon = NULL;
-	in_win->params.layer = xplm_WindowLayerFloatingWindows;
-	in_win->params.decorateAsFloatingWindow = xplm_WindowDecorationRoundRectangle;
-
 	int left, bottom, right, top;
 	XPLMGetScreenBoundsGlobal(&left, &top, &right, &bottom);
-	in_win->params.left = left + win_left;
-	in_win->params.bottom = bottom + win_down;
-	in_win->params.right = in_win->params.left + in_win->width - 20;
-	in_win->params.top = in_win->params.bottom + in_win->height - 20;
-	in_win->params.contentType = xplm_WindowContentTypePanelGraphics;
 
+	const XPLMCreateWindow_t win_params = {
+		.structSize = sizeof(in_win->params),
+		.visible = 1,
+		.drawWindowFunc = in_win->draw_func,
+		.handleMouseClickFunc = in_win->click_func,
+		.handleRightClickFunc = in_win->click_func,
+		.handleMouseWheelFunc = in_win->wheel_func,
+		.handleKeyFunc = in_win->key_func,
+		.handleCursorFunc = in_win->cursor_func,
+		.layer = xplm_WindowLayerFloatingWindows,
+		.decorateAsFloatingWindow = xplm_WindowDecorationRoundRectangle,
+
+		.left = left + win_left,
+		.bottom = bottom + win_down,
+		.right = in_win->params.left + in_win->width - 20,
+		.top = in_win->params.bottom + in_win->height - 20,
+		.contentType = xplm_WindowContentTypePanelGraphics
+	};
+
+	in_win->params = win_params;
 	in_win->id = XPLMCreateWindowEx(&in_win->params);
 
 	XPLMSetWindowPositioningMode(in_win->id, xplm_WindowPositionFree, -1);

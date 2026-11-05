@@ -13,12 +13,12 @@ static sw_t *all_sw;
 static int all_sw_size = 0;
 
 // Switch Callbacks
-static int sw_basic_cb(XPLMCommandRef inCommand, XPLMCommandPhase inPhase, void *inRefcon) {
-	UNUSED(inCommand);
+static int sw_basic_cb(XPLMCommandRef in_cmd, XPLMCommandPhase in_phase, void *in_ref) {
+	UNUSED(in_cmd);
 
-	const int i = (int)inRefcon;
+	const int i = (int)in_ref;
 
-	if (inPhase == xplm_CommandBegin) {
+	if (in_phase == xplm_CommandBegin) {
 		if (all_sw[i].state == 0) {
 			all_sw[i].act_gain = SWITCH_GAIN;
 		}
@@ -28,7 +28,7 @@ static int sw_basic_cb(XPLMCommandRef inCommand, XPLMCommandPhase inPhase, void 
 
 		all_sw[i].state = !all_sw[i].state;
 	}
-	else if ((all_sw[i].spring != SW_NO_SPRING) && (inPhase == xplm_CommandEnd)) {
+	else if ((all_sw[i].spring != SW_NO_SPRING) && (in_phase == xplm_CommandEnd)) {
 		all_sw[i].act_gain = -SWITCH_GAIN;
 		all_sw[i].state = 0;
 	}
@@ -40,16 +40,16 @@ static int sw_basic_cb(XPLMCommandRef inCommand, XPLMCommandPhase inPhase, void 
 	return xplm_CommandContinue;
 }
 
-static int sw_cb_l(XPLMCommandRef inCommand, XPLMCommandPhase inPhase, void *inRefcon) {
-	UNUSED(inCommand);
+static int sw_cb_l(XPLMCommandRef in_cmd, XPLMCommandPhase in_phase, void *in_ref) {
+	UNUSED(in_cmd);
 
-	const int i = (int)inRefcon;
+	const int i = (int)in_ref;
 
-	if ((inPhase == xplm_CommandBegin) && (all_sw[i].state > all_sw[i].min)) {
+	if ((in_phase == xplm_CommandBegin) && (all_sw[i].state > all_sw[i].min)) {
 		all_sw[i].act_gain = -SWITCH_GAIN;
 		all_sw[i].state -= 1;
 	}
-	else if ((inPhase == xplm_CommandEnd) && (all_sw[i].spring == SW_MOMENTARY)) {
+	else if ((in_phase == xplm_CommandEnd) && (all_sw[i].spring == SW_MOMENTARY)) {
 		all_sw[i].act_gain = SWITCH_GAIN;
 		all_sw[i].state += 1;
 	}
@@ -61,16 +61,16 @@ static int sw_cb_l(XPLMCommandRef inCommand, XPLMCommandPhase inPhase, void *inR
 	return xplm_CommandContinue;
 }
 
-static int sw_cb_r(XPLMCommandRef inCommand, XPLMCommandPhase inPhase, void *inRefcon) {
-	UNUSED(inCommand);
+static int sw_cb_r(XPLMCommandRef in_cmd, XPLMCommandPhase in_phase, void *in_ref) {
+	UNUSED(in_cmd);
 
-	const int i = (int)inRefcon;
+	const int i = (int)in_ref;
 
-	if ((inPhase == xplm_CommandBegin) && (all_sw[i].state < all_sw[i].max)) {
+	if ((in_phase == xplm_CommandBegin) && (all_sw[i].state < all_sw[i].max)) {
 		all_sw[i].act_gain = SWITCH_GAIN;
 		all_sw[i].state += 1;
 	}
-	else if ((inPhase == xplm_CommandEnd) && (all_sw[i].spring != SW_NO_SPRING)) {
+	else if ((in_phase == xplm_CommandEnd) && (all_sw[i].spring != SW_NO_SPRING)) {
 		if (((all_sw[i].spring == SW_SPRING_LAST_POS_ONLY) && (all_sw[i].state == all_sw[i].max)) || (
 				all_sw[i].spring == SW_MOMENTARY)) {
 			all_sw[i].act_gain = -SWITCH_GAIN;
@@ -113,16 +113,16 @@ void sw_ref(void) {
 }
 
 // Callbacks to update the state of the switch. Used by X-Plane
-static int sw_get_state2(void *inRefcon) {
-	return sw_get_state((int)inRefcon);
+static int sw_get_state2(void *in_ref) {
+	return sw_get_state((int)in_ref);
 }
 
-static void sw_set_state2(void *inRefcon, int in_num) {
-	sw_set_state((int)inRefcon, in_num);
+static void sw_set_state2(void *in_ref, int in_num) {
+	sw_set_state((int)in_ref, in_num);
 }
 
-static float sw_get_anim2(void *inRefcon) {
-	return sw_get_anim((int)inRefcon);
+static float sw_get_anim2(void *in_ref) {
+	return sw_get_anim((int)in_ref);
 }
 
 // Callbacks to update & get the state of the switch. Used instead of pointers to prevent issues

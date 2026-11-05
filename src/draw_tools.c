@@ -2,7 +2,7 @@
 
 #include <math.h>
 
-void sc_draw_triangle(float x, float y, float width, float height, uint32_t color) {
+void sc_draw_triangle(const float x, float y, const float width, const float height, const uint32_t color) {
 	float x1, y1, x2, y2, x3, y3;
 
 	if (height < 0) {
@@ -32,7 +32,7 @@ void sc_draw_triangle(float x, float y, float width, float height, uint32_t colo
 	XPLMPolygon(color, vlist, 3);
 }
 
-void sc_draw_circle(float left, float bottom, float r, uint32_t color) {
+void sc_draw_circle(const float left, const float bottom, const float r, const uint32_t color) {
 	XPLMVertex_t array[36];
 
 	for (int i = 0; i < 36; i++) {
@@ -49,7 +49,7 @@ void sc_draw_circle(float left, float bottom, float r, uint32_t color) {
 	XPLMPolygon(color, array, 36);
 }
 
-void sc_draw_rect(float left, float bottom, float width, float height, uint32_t color) {
+void sc_draw_rect(const float left, const float bottom, const float width, const float height, const uint32_t color) {
 	const float x1 = left;
 	const float y1 = bottom;
 	const float x2 = x1 + width;
@@ -64,16 +64,17 @@ void sc_draw_rect(float left, float bottom, float width, float height, uint32_t 
 	XPLMPolygon(color, vlist, 4);
 }
 
-void sc_draw_rect2(float left, float bottom, float width, float height, uint32_t color, float borderSize,
-				   uint32_t borderColor) {
+void sc_draw_rect2(const float left, const float bottom, const float width, const float height, const uint32_t color,
+				   const float border_size, const uint32_t borderColor) {
 	sc_draw_rect(left, bottom, width, height, color);
-	sc_draw_rect(left, bottom, borderSize, height, borderColor);
-	sc_draw_rect(left + width - borderSize, bottom, borderSize, height, borderColor);
-	sc_draw_rect(left, bottom + height - borderSize, width, borderSize, borderColor);
-	sc_draw_rect(left, bottom, width, borderSize, borderColor);
+	sc_draw_rect(left, bottom, border_size, height, borderColor);
+	sc_draw_rect(left + width - border_size, bottom, border_size, height, borderColor);
+	sc_draw_rect(left, bottom + height - border_size, width, border_size, borderColor);
+	sc_draw_rect(left, bottom, width, border_size, borderColor);
 }
 
-void sc_draw_line(float start_x, float start_y, float end_x, float end_y, uint32_t color, float thickness) {
+void sc_draw_line(const float start_x, const float start_y, const float end_x, const float end_y, const uint32_t color,
+				  const float thickness) {
 	XPLMVertex_t vlist[4] = {
 		{start_x, start_y},
 		{end_x, end_y},

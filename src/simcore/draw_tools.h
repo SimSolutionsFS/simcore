@@ -70,10 +70,10 @@ void sc_draw_rect(float left, float bottom, float width, float height, uint32_t 
  * @param width Width of the rectangle
  * @param height Height of the rectangle
  * @param color Color of the rectangle
- * @param borderSize Border size of the rectangle if needed; set to -1 to not show
+ * @param border_size Border size of the rectangle if needed; set to -1 to not show
  * @param borderColor Color of the rectangle border (if shown)
  */
-void sc_draw_rect2(float left, float bottom, float width, float height, uint32_t color, float borderSize,
+void sc_draw_rect2(float left, float bottom, float width, float height, uint32_t color, float border_size,
 				   uint32_t borderColor);
 
 /**

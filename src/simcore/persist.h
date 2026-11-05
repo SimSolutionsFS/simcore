@@ -23,15 +23,15 @@ extern "C" {
 
 /**
  * @brief Initializes the persistence system.
- *
- * @param in_folder_pth Use a format like "/DA40/"
  */
 void persist_init(const char *in_folder_pth);
 
 /**
  * @brief Starts the persistence system on aircraft load.
+ *
+ * @param in_folder_pth Use a format like "/DA40/"
  */
-void persist_on_load(void);
+void persist_on_load();
 
 /**
  * @brief Unregisters the flight loop registered in persist_on_load().

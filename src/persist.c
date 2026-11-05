@@ -32,8 +32,9 @@ static double dist_to_save = -1;
 
 // Flight loop stuff, important for stuff to run well
 static XPLMFlightLoopID persist_fl;
-static char *persist_fp;
 static conf_t *persist_conf;
+static char persist_fp[512];
+static char folder_pth[512];
 
 // Config settings & basic state stuff
 static int load_save = 0;
@@ -73,12 +74,13 @@ static sc_win_t pmpt_win;
 static XPLMFontHandle win_header_font;
 static XPLMFontHandle win_text_font;
 
-static char win_vrb_text[512];
+static int kill_win = 0;
+static XPLMFlightLoopID kill_fl;
 
 // Flight loop that constantly loads the state of the aircraft (every UPDATE_RATE_SEC) and updates its status in the file.
-static float persist_fl_ref(float elapsedMe, float elapsedSim, int counter, void *refcon) {
-	UNUSED(elapsedMe);
-	UNUSED(elapsedSim);
+static float persist_fl_ref(float elapsed_me, float elapsed_time, int counter, void *refcon) {
+	UNUSED(elapsed_me);
+	UNUSED(elapsed_time);
 	UNUSED(counter);
 	UNUSED(refcon);
 
@@ -139,24 +141,21 @@ static void persist_load_save(void) {
 static void persist_fl_start(void) {
 	// Create a flight loop to constantly refresh stuff
 	XPLMCreateFlightLoop_t persistenceFLParams = {
-		sizeof(XPLMCreateFlightLoop_t),
-		xplm_FlightLoop_Phase_AfterFlightModel,
-		persist_fl_ref,
-		NULL
+		.structSize = sizeof(XPLMCreateFlightLoop_t),
+		.phase = xplm_FlightLoop_Phase_AfterFlightModel,
+		.callbackFunc = persist_fl_ref
 	};
 
 	persist_fl = XPLMCreateFlightLoop(&persistenceFLParams);
 	XPLMScheduleFlightLoop(persist_fl, UPDATE_RATE_SEC, 1);
 }
 
-static int kill_win = 0;
-static XPLMFlightLoopID kill_fl;
-
-static void pmpt_win_render(XPLMWindowID in_window_id, void *inRefcon) {
-	UNUSED(inRefcon);
+static void pmpt_win_render(XPLMWindowID in_win_id, void *in_ref) {
+	UNUSED(in_ref);
+	static char win_vrb_text[512];
 
 	int windowLeft, windowBottom;
-	XPLMGetWindowGeometry(in_window_id, &windowLeft, NULL, NULL, &windowBottom);
+	XPLMGetWindowGeometry(in_win_id, &windowLeft, NULL, NULL, &windowBottom);
 
 	const float base_x = (float)windowLeft - 10;
 	const float base_y = (float)windowBottom - 10;
@@ -166,7 +165,7 @@ static void pmpt_win_render(XPLMWindowID in_window_id, void *inRefcon) {
 	XPLMFontDrawString(win_header_font, SC_COLOR_WHITE, 39, base_x + 10, base_y + 214, "Restore your last state?",
 					   xplm_JustLeft);
 
-	sprintf(win_vrb_text, "You are %.2f nm from your last session.", dist_to_save);
+	snprintf(win_vrb_text, sizeof(win_vrb_text), "You are %.2f nm from your last session.", dist_to_save);
 	XPLMFontDrawString(win_text_font, SC_COLOR_WHITE, 27, base_x + 15, base_y + 165, win_vrb_text, xplm_JustLeft);
 	XPLMFontDrawString(win_text_font, SC_COLOR_WHITE, 27, base_x + 15, base_y + 115,
 					   "Would you like to restore your position and", xplm_JustLeft);
@@ -179,12 +178,12 @@ static void pmpt_win_render(XPLMWindowID in_window_id, void *inRefcon) {
 	XPLMFontDrawString(win_text_font, SC_COLOR_WHITE, 27, base_x + 235, base_y + 28, "No", xplm_JustCenter);
 }
 
-static int pmpt_win_cb(XPLMWindowID inWindowID, int x, int y, XPLMMouseStatus inMouse, void *inRefcon) {
-	UNUSED(inMouse);
-	UNUSED(inRefcon);
+static int pmpt_win_cb(XPLMWindowID in_win_id, int x, int y, XPLMMouseStatus in_mouse, void *in_ref) {
+	UNUSED(in_mouse);
+	UNUSED(in_ref);
 
 	int windowLeft, windowBottom;
-	XPLMGetWindowGeometry(inWindowID, &windowLeft, NULL, NULL, &windowBottom);
+	XPLMGetWindowGeometry(in_win_id, &windowLeft, NULL, NULL, &windowBottom);
 
 	x -= windowLeft;
 	y -= windowBottom;
@@ -213,11 +212,11 @@ static int pmpt_win_cb(XPLMWindowID inWindowID, int x, int y, XPLMMouseStatus in
  *
  * That is the only reason this flight loop exists.
  */
-static float the_kill_fl_ref(float elapsedMe, float elapsedSim, int counter, void *refcon) {
-	UNUSED(elapsedMe);
-	UNUSED(elapsedSim);
+static float the_kill_fl_ref(float elapsed_me, float elapsed_sim, int counter, void *in_ref) {
+	UNUSED(elapsed_me);
+	UNUSED(elapsed_sim);
 	UNUSED(counter);
-	UNUSED(refcon);
+	UNUSED(in_ref);
 
 	if (kill_win == 1) {
 		XPLMDestroyWindow(pmpt_win.id);
@@ -231,10 +230,9 @@ static float the_kill_fl_ref(float elapsedMe, float elapsedSim, int counter, voi
 static void pmpt_win_create(void) {
 	// schedule the KILL flight loop.
 	XPLMCreateFlightLoop_t persistenceFLParams = {
-		sizeof(XPLMCreateFlightLoop_t),
-		xplm_FlightLoop_Phase_AfterFlightModel,
-		the_kill_fl_ref,
-		NULL
+		.structSize = sizeof(XPLMCreateFlightLoop_t),
+		.phase = xplm_FlightLoop_Phase_AfterFlightModel,
+		.callbackFunc = the_kill_fl_ref
 	};
 
 	kill_fl = XPLMCreateFlightLoop(&persistenceFLParams);
@@ -248,14 +246,7 @@ static void pmpt_win_create(void) {
 }
 
 void persist_init(const char *in_folder_pth) {
-	// Start finding path to save
-	persist_fp = malloc(sizeof(char) * 512);
-	char *prefs_fp = malloc(sizeof(char) * 512);
-
-	XPLMGetPrefsPath(prefs_fp);
-	prefs_fp[strlen(prefs_fp) - 28] = '\0';
-	snprintf(persist_fp, sizeof(char) * 512, "%s%s", prefs_fp, in_folder_pth);
-	free(prefs_fp);
+	strncpy(folder_pth, in_folder_pth, sizeof(folder_pth));
 
 	// Load colors
 	SC_COLOR_PRI = XPLMMakeColor(0.23f, 0.49f, 0.65f, 1);
@@ -301,13 +292,21 @@ static void persist_begin(void) {
 
 // Runs when the aircraft first starts.
 void persist_on_load(void) {
+	// Start finding path to save
+	char prefs_fp[512];
+	char persist_dir[512];
+
+	XPLMGetPrefsPath(prefs_fp);
+	prefs_fp[strlen(prefs_fp) - 28] = '\0';
+	snprintf(persist_dir, sizeof(persist_dir), "%s%s", prefs_fp, folder_pth);
+
 	// Check to see if the saves directory exists, if not create it.
-	if (ACCESS(persist_fp, R_OK) != 0) {
+	if (ACCESS(persist_dir, R_OK) != 0) {
 		logMsg("Save directory does not exist. Creating!");
-		const int check = MKDIR(persist_fp);
+		const int check = MKDIR(persist_dir);
 		const int err = errno;
 		if (check != 0) {
-			logMsg("Attempted to create directory with error code %i. The attempted path was %s.", err, persist_fp);
+			logMsg("Attempted to create directory with error code %i. The attempted path was %s.", err, persist_dir);
 			assert(check == 0);
 		}
 	}
@@ -316,21 +315,18 @@ void persist_on_load(void) {
 	dr_t dr_liv_pth;
 	dr_find(&dr_liv_pth, "sim/aircraft/view/acf_livery_path");
 
-	int len = dr_gets(&dr_liv_pth, NULL, 0);
-	char *liv_pth;
+	const int len = dr_gets(&dr_liv_pth, NULL, 0);
+	char liv_pth[512];
 	if (len == 0) {
-		liv_pth = malloc(sizeof(char) * 8);
-		strcpy(liv_pth, "default");
+		strncpy(liv_pth, "default", sizeof(liv_pth));
 	}
 	else {
-		liv_pth = malloc(len);
-		dr_gets(&dr_liv_pth, liv_pth, len);
-		liv_pth = XPLMExtractFileAndPath(liv_pth);
+		dr_gets(&dr_liv_pth, liv_pth, sizeof(liv_pth));
+		strncpy(liv_pth, XPLMExtractFileAndPath(liv_pth), sizeof(liv_pth));
 	}
 
-	// Finalize the path to save file
-	sprintf(persist_fp, "%s%s.cfg", persist_fp, liv_pth);
-	//free(liv_pth); DON'T UNCOMMENT THIS OR ELSE WINDOWS WILL CRASH. THIS REMAINS HERE HAS A REMINDER TO THE FUTURE TRAVELERS OF THIS CODE.
+	// Start finding path to save
+	snprintf(persist_fp, sizeof(persist_fp), "%s%s.cfg", persist_dir, liv_pth);
 
 	// Do rest of loading
 	logMsg("Persistence system enabled.");
@@ -363,6 +359,5 @@ void persist_on_load(void) {
 void persist_stop(void) {
 	XPLMDestroyFlightLoop(persist_fl);
 
-	free(persist_fp);
 	conf_free(persist_conf);
 }
